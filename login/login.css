@@ -1,0 +1,61 @@
+
+
+main {
+    justify-content: center;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 30px;
+}
+
+.input-mail {
+    justify-content: center;
+    display: flex;
+    position: relative;
+    padding: 10px;
+}
+
+.input-mail i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 9%;
+    
+}
+
+.input-mail input {
+    padding-right: 20px;
+}
+
+.input-password {
+    justify-content: center;
+    display: flex;
+    position: relative;
+    padding: 10px;
+}
+
+.input-password i {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 9%;
+}
+
+.input-password input {
+    padding-right: 20px;
+}
+
+.button-login {
+    justify-content: center;
+    display: flex;
+    margin-top: 20px;
+    width: 300px;
+    height: 30px;
+    
+}
+
+.register {
+    justify-content: center;
+    display: flex;
+    margin-top: 20px;
+}
