@@ -1,11 +1,21 @@
-
-
-main {
+body {
     justify-content: center;
     display: flex;
     align-items: center;
+    height: 70vh;
+    margin-top: 44px;
+    opacity: 0.9;
+    background-color: rgba(26, 25, 25, 0.432);
+    
+}
+
+main {
     gap: 10px;
-    margin-top: 30px;
+    margin-top: 30px;  
+    background-color: rgba(250, 250, 250, 0.644);  
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 .input-mail {
@@ -25,6 +35,8 @@ main {
 
 .input-mail input {
     padding-right: 20px;
+    width: 66%;
+    padding: 2px;
 }
 
 .input-password {
@@ -43,6 +55,8 @@ main {
 
 .input-password input {
     padding-right: 20px;
+    width: 66%;
+    padding: 2px;
 }
 
 .button-login {
