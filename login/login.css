@@ -72,6 +72,8 @@ main {
     justify-content: center;
     display: flex;
     margin-top: 20px;
+    align-items: center;
+    
 }
 
 
