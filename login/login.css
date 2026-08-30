@@ -1,77 +1,179 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    justify-content: center;
+   min-height: 100vh;
+   font-family: Arial, Helvetica, sans-serif;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+    background: linear-gradient(135deg, #071b49, #0d3b8f);
+}
+ .container {
+    width: 900px;
+    height: 600px;
     display: flex;
-    align-items: center;
-    height: 70vh;
-    margin-top: 44px;
-    opacity: 0.9;
-    background-color: rgba(45, 40, 40, 0.6);
-    
+    background: white;
+    border-radius: 25px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
 }
 
-main {
-    gap: 10px;
-    margin-top: 30px;  
-    background-color: rgba(245, 236, 236, 0.479);  
-    padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.input-mail {
-    justify-content: center;
+.welcome {
+    width: 45%;
+    padding: 60px;
     display: flex;
-    position: relative;
-    padding: 10px;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, #071b49, #123b8f);
+    color: white;
 }
 
-.input-mail i {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 9%;
-    
+.welcome h2{
+    font-size: 32px;
 }
 
-.input-mail input {
-    padding-right: 20px;
-    width: 66%;
-    padding: 2px;
+.welcome p {
+    font-size: 16x;
+    line-height: 1.6;
+    max-width: 320px;
 }
 
+.welcome i {
+    margin-top: 50px;
+    font-size: 70px;
+    color: white;
+    display: flex;
+    justify-content: center;
+}
+
+.container form {
+    width: 55%;
+    padding: 50px 60px; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.container h1 {
+    font-size: 32px;
+    color: #102452;
+    margin-bottom: 40px;
+}
+
+.input-mail,
 .input-password {
-    justify-content: center;
-    display: flex;
+    width: 100%;
+    height: 55px;
     position: relative;
-    padding: 10px;
+    margin-bottom: 20px;
 }
 
+.input-mail input,
+.input-password input {
+    width: 100%;
+    height: 100%;
+    padding: 0 50px 20px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    outline: none;
+    font-size: 15px;
+    color: #333;
+    transition: 0.3s;
+}
+
+.input-mail input:focus,
+.input-password input:focus {
+    border-color:#1456d9;
+    box-shadow: 0 0 3px rgba(20, 86, 217, 0.12);
+}
+
+.input-mail input::placeholder,
+.input-password input::placeholder {
+    color: #777;
+}
+
+.input-mail i,
 .input-password i {
     position: absolute;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
-    right: 9%;
+    color:#526789;
+    font-size: 18px;
 }
 
-.input-password input {
-    padding-right: 20px;
-    width: 66%;
-    padding: 2px;
-}
-
-.button-login {
-    justify-content: center;
+.remember-password {
     display: flex;
-    margin-top: 20px;
-    width: 300px;
-    height: 30px;
-    
+    align-items: center;
+    justify-content: space-between;
+    margin: 5px 0 25px;
+    font-size: 13px;
 }
 
-.register {
-    justify-content: center;
+.remenber-password lebel {
     display: flex;
-    margin-top: 20px;
+    align-items: center;
+    gap: 6px;
+    color: #555;
 }
 
+.remenber-password input [type="checkbox"] {
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
 
+.remenber-password a {
+    color: #1456d9;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.remember-password a:hover {
+    text-decoration: underline;
+}
+
+.button-login button {
+    width: 100%;
+    height: 52px;
+    border: none;
+    border-radius:10px ;
+    background: linear-gradient(135deg, #123b8f, #1456d9);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.button-login button:hover {
+    transition:  translateY(-2px);
+    box-shadow: 0 8px 20px rgba(20, 86, 217, 0.3);
+}
+
+.register a {
+    color: #1456d9;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.register a:hover {
+    text-decoration:underline ;
+}
+
+@media (max-width: 700px) {
+    .container{
+        width: 90%;
+        min-height: auto;
+    }
+    .container form {
+        width: 100%;
+        padding: 35px 25px;
+    }
+    .container h1 {
+        font-size: 27px;
+    }
+}
