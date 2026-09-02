@@ -7,26 +7,66 @@ formulario.addEventListener("submit", function(event) {
      const email = document.getElementById("email").value;
      const senha = document.getElementById("senha").value;
 
-     console.log("Emaii" , email);
-     console.log("Senha", senha);
+// verificação de email e senha
+     
+   if(email === "") {
+      alert("Digite seu e-mail.");
+      return;
+   }
 
-     if(email === ""|| senha === "" ) {
-        alert("Prencha todos os campos !")
-        
-        return;
-     }
+   if(senha === "") {
+      alert("Digite sua senha.");
+      return;
+   }
 
-     if(!email.includes("@")) {
-        alert("Digite um Email válido!");
-        return;
-     }
+//Validacão do formato do email
+   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+   if(!emailRegex.test(email)) {
+      alert("Digite um email válido.");
+      return;
+   }
 
-     if(senha.length < 6 ){
-        alert("A senha precisa ter pelomenos 6 caracteres")
-        return;
-     }
+//Validacao do tamanho da senha
 
-     alert("Login realizado com sucesso !")
+if (senha.length <= 3) {
+    alert("A senha deve ter mais de 4 caracteres!");
+    return;
+}
+
+if (!/[A-Z]/.test(senha)) {
+    alert("A senha deve conter pelo menos uma letra maiúscula!");
+    return;
+}
+
+if (!/[a-z]/.test(senha)) {
+    alert("A senha deve conter pelo menos uma letra minúscula!");
+    return;
+}
+
+if (!/[0-9]/.test(senha)) {
+    alert("A senha deve conter pelo menos um número!");
+    return;
+}
+
+if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senha)) {
+    alert("A senha deve conter pelo menos um caractere especial!");
+    return;
+}
 
      window.location.href = "../home/home.html";
+});
+
+const mostrarSenha = document.getElementById("mostrarSenha");
+const senha = document.getElementById("senha");
+
+mostrarSenha.addEventListener("click",function() {
+   if(senha.type === "password") {
+      senha.type = "text";
+      mostrarSenha.clssList.remove("fa-eye");
+      mostrarSenha.classList.add("fa-eye-slash");
+      }else{
+      senha.type = "password";
+      mostrarSenha.classList.remove("fa-eye-slash");
+      mostrarSenha.classList.add("fa-eye");
+      }
 });
