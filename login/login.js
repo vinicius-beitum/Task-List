@@ -1,72 +1,168 @@
 const formulario = document.getElementById("loginForm");
 
-formulario.addEventListener("submit", function(event) {
+const email = document.getElementById("email");
+const senha = document.getElementById("senha");
+const lembrar = document.getElementById("lembrar");
+const mostrarSenha = document.getElementById("mostrarSenha");
 
-     event.preventDefault();
 
-     const email = document.getElementById("email").value;
-     const senha = document.getElementById("senha").value;
+// =====================================
+// CARREGAR E-MAIL SALVO
+// =====================================
 
-// verificação de email e senha
-     
-   if(email === "") {
-      alert("Digite seu e-mail.");
-      return;
-   }
+window.addEventListener("load", function() {
 
-   if(senha === "") {
-      alert("Digite sua senha.");
-      return;
-   }
+    const emailSalvo = localStorage.getItem("email");
 
-//Validacão do formato do email
-   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-   if(!emailRegex.test(email)) {
-      alert("Digite um email válido.");
-      return;
-   }
+    if (emailSalvo) {
 
-//Validacao do tamanho da senha
+        email.value = emailSalvo;
+        lembrar.checked = true;
 
-if (senha.length <= 3) {
-    alert("A senha deve ter mais de 4 caracteres!");
-    return;
-}
+    }
 
-if (!/[A-Z]/.test(senha)) {
-    alert("A senha deve conter pelo menos uma letra maiúscula!");
-    return;
-}
-
-if (!/[a-z]/.test(senha)) {
-    alert("A senha deve conter pelo menos uma letra minúscula!");
-    return;
-}
-
-if (!/[0-9]/.test(senha)) {
-    alert("A senha deve conter pelo menos um número!");
-    return;
-}
-
-if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senha)) {
-    alert("A senha deve conter pelo menos um caractere especial!");
-    return;
-}
-
-     window.location.href = "../home/home.html";
 });
 
-const mostrarSenha = document.getElementById("mostrarSenha");
-const senha = document.getElementById("senha");
 
-mostrarSenha.addEventListener("click",function() {
-   if(senha.type === "password") {
-      senha.type = "text";
-      mostrarSenha.clssList.remove("fa-eye");
-      mostrarSenha.classList.add("fa-eye-slash");
-      }else{
-      senha.type = "password";
-      mostrarSenha.classList.remove("fa-eye-slash");
-      mostrarSenha.classList.add("fa-eye");
-      }
+// =====================================
+// FORMULÁRIO DE LOGIN
+// =====================================
+
+formulario.addEventListener("submit", function(event) {
+
+    event.preventDefault();
+
+    const emailDigitado = email.value;
+    const senhaDigitada = senha.value;
+
+
+    // Verificação de email e senha
+
+    if (emailDigitado === "") {
+
+        alert("Digite seu e-mail.");
+        return;
+
+    }
+
+    if (senhaDigitada === "") {
+
+        alert("Digite sua senha.");
+        return;
+
+    }
+
+
+    // =====================================
+    // VALIDAÇÃO DO E-MAIL
+    // =====================================
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(emailDigitado)) {
+
+        alert("Digite um email válido.");
+        return;
+
+    }
+
+
+    // =====================================
+    // VALIDAÇÃO DA SENHA
+    // =====================================
+
+    if (senhaDigitada.length < 4) {
+
+        alert("A senha deve ter pelo menos 4 caracteres!");
+        return;
+
+    }
+
+
+    // Letra maiúscula
+
+    if (!/[A-Z]/.test(senhaDigitada)) {
+
+        alert("A senha deve conter pelo menos uma letra maiúscula!");
+        return;
+
+    }
+
+
+    // Letra minúscula
+
+    if (!/[a-z]/.test(senhaDigitada)) {
+
+        alert("A senha deve conter pelo menos uma letra minúscula!");
+        return;
+
+    }
+
+
+    // Número
+
+    if (!/[0-9]/.test(senhaDigitada)) {
+
+        alert("A senha deve conter pelo menos um número!");
+        return;
+
+    }
+
+
+    // Caractere especial
+
+    if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
+
+        alert("A senha deve conter pelo menos um caractere especial!");
+        return;
+
+    }
+
+
+    // =====================================
+    // LEMBRAR E-MAIL
+    // =====================================
+
+    if (lembrar.checked) {
+
+        localStorage.setItem("email", emailDigitado);
+
+    } else {
+
+        localStorage.removeItem("email");
+
+    }
+
+
+    // =====================================
+    // IR PARA A HOME
+    // =====================================
+
+    window.location.href = "../home/home.html";
+
+});
+
+
+// =====================================
+// MOSTRAR / OCULTAR SENHA
+// =====================================
+
+mostrarSenha.addEventListener("click", function() {
+
+    if (senha.type === "password") {
+
+        senha.type = "text";
+
+        mostrarSenha.classList.remove("fa-eye");
+        mostrarSenha.classList.add("fa-eye-slash");
+
+    } else {
+
+        senha.type = "password";
+
+        mostrarSenha.classList.remove("fa-eye-slash");
+        mostrarSenha.classList.add("fa-eye");
+
+    }
+
 });
