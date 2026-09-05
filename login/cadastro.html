@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+    <title>Cadastro</title>
+</head>
+<body>
+
+ <main class="container cadastro">
+
+    <div class="welcome">
+
+        <h2>Bem-vindo!</h2>
+            <p>
+            Crie sua conta para acessar todos os recursos
+            e aproveitar ao máximo nossa plataforma.
+            </p>
+
+        <i class="fa-solid fa-user-plus"></i>
+    </div>
+
+    <form id="cadastroForm">
+        <h1>Crie sua conta </h1>
+
+    <div class="input-mail">
+        <input type="text" id="nome" placeholder="Digite seu Nome">
+        <i class="fa-solid fa-user"></i>
+    </div>
+
+    <span class="erro" id="erroNome"></span>
+
+    <div class="input-mail">
+        <input type="email" id="emailCadastro" placeholder="Digite seu Email">
+        <i class="fa-solid fa-envelope"></i>
+    </div>
+
+    <span class="erro" id="erroEmailCadastro"></span>
+
+    <div class="input-password">
+        <input type="password" id="senhaCadastro" placeholder="Digite uma senha">
+        <i class="fa-solid fa-eye" id="mostrarSenhaCadastro"></i>
+    </div>
+
+    <span class="erro" id="erroSenhaCadastro"></span>
+
+    <div class="input-password">
+        <input type="password" id="confirmarSenha" placeholder="Confirme sua senha">
+        <i class="fa-solid fa-eye" id="mostrarConfirmarSenha"></i>
+    </div>
+
+    <span class="erro" id="erroConfirmarSenha"></span>
+
+    <div class="remember-password">
+        <label>
+            <input type="checkbox" id="termos">
+            Aceito os termos e condições.
+        </label>
+    </div>
+
+    <span class="erro" id="erroTermos"></span>
+
+    <div class="button-login">
+        <button type="submit">Cria Conta</button>
+    </div>
+
+    <div class="Register">
+        <p> Já tem uma conta ?</p>
+        <a href="login.html">Faça login</a>
+    </div>
+
+    </form>
+
+</main>
+<script src="cadastro.js"></script>
+</body>
+</html>

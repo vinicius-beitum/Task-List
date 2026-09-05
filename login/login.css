@@ -51,7 +51,7 @@ body {
 }
 
 .container form {
-    width: 55%;
+    width: 60%;
     padding: 50px 60px; 
     display: flex;
     flex-direction: column;
@@ -65,7 +65,7 @@ body {
 }
 
 .input-mail,
-.input-password {
+.input-password  {
     width: 100%;
     height: 55px;
     position: relative;
@@ -75,8 +75,8 @@ body {
 .input-mail input,
 .input-password input {
     width: 100%;
-    height: 100%;
-    padding: 0 50px 20px;
+    height: 120%;
+    padding: 0 55px ;
     border: 1px solid #cbd5e1;
     border-radius: 10px;
     outline: none;
@@ -154,6 +154,49 @@ body {
     box-shadow: 0 8px 20px rgba(20, 86, 217, 0.3);
 }
 
+.error {
+    display: block;
+    color: #d93025;
+    font-size: 13px;
+    text-align: left;
+    margin-top: -12px;
+    margin-bottom: 15px;
+    min-height: 16px;
+}
+
+.input-erro {
+    border: 1px solid #d93025 !important;
+    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1); 
+}
+
+.texto-recuperacao {
+    color: #777;
+    font-size: 14px;
+    line-height: 1.5;
+    margin-top: -25px;
+    margin-bottom: 30px;
+}
+
+.erro {
+    display: block;
+    color: #d93025;
+    font-size: 13px;
+    text-align: left;
+    margin-top: -12px;
+    margin-bottom: 15px;
+    min-height: 16px;
+}
+
+.input-erro {
+    border: 1px solid #d93025 !important;
+    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1);
+
+}
+
+.recuperar {
+       flex-direction: row-reverse;
+}
+
 .register a {
     color: #1456d9;
     font-weight: bold;
@@ -178,17 +221,3 @@ body {
     }
 }
 
-.error {
-    display: block;
-    color: #d93025;
-    font-size: 13px;
-    text-align: left;
-    margin-top: -12px;
-    margin-bottom: 15px;
-    min-height: 16px;
-}
-
-.input-erro {
-    border: 1px solid #d93025 !important;
-    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1); 
-}
