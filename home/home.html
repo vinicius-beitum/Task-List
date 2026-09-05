@@ -1,20 +1,204 @@
 <!DOCTYPE html>
+<html lang="pt-BR">
 
-<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task List</title>
-</head>
-<body>
-    <main class="container">
-        <h1>Gerencie seu dia a dia aqui</h1>
-        <div class="input-tasks">
-        <input type="text" name="" id="" placeholder="Adicione sua tarefa">
-        <button id="addTask">Adicionar</button>
-        <ul id="taskList">
 
-        </ul>
+    <title>Task Manager</title>
+
+    <link rel="stylesheet" href="home.css">
+    <link rel="sylesheet" href="home.js">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- MENU LATERAL -->
+
+        <aside class="sidebar">
+
+            <div class="logo">
+                <div class="logo-icon">✓</div>
+
+                <h2>TaskFlow</h2>
+            </div>
+
+
+            <nav>
+
+                <a href="#" class="active">
+                    <span>▣</span>
+                    Visão geral
+                </a>
+
+                <a href="#">
+                    <span>☐</span>
+                    Minhas tarefas
+                </a>
+
+                <a href="#">
+                    <span>✓</span>
+                    Concluídas
+                </a>
+
+            </nav>
+
+
+            <div class="sidebar-bottom">
+
+                <p>Organize seu dia.</p>
+
+            </div>
+
+        </aside>
+
+
+        <!-- CONTEÚDO PRINCIPAL -->
+
+        <main class="content">
+
+            <header class="top">
+
+                <div>
+                    <h1>Olá! 👋</h1>
+
+                    <p>
+                        Aqui está o resumo das suas tarefas.
+                    </p>
+                </div>
+
+                <button class="new-task">
+                    + Nova tarefa
+                </button>
+
+            </header>
+
+
+            <!-- CARDS DE RESUMO -->
+
+            <section class="stats">
+
+                <div class="stat-card">
+
+                    <div class="stat-icon blue">
+                        ☰
+                    </div>
+
+                    <div>
+                        <span>Total</span>
+                        <strong id="totalTasks">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon green">
+                        ✓
+                    </div>
+
+                    <div>
+                        <span>Concluídas</span>
+                        <strong id="completedTasks">0</strong>
+                    </div>
+
+                </div>
+
+
+                <div class="stat-card">
+
+                    <div class="stat-icon orange">
+                        !
+                    </div>
+
+                    <div>
+                        <span>Pendentes</span>
+                        <strong id="pendingTasks">0</strong>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- ÁREA PRINCIPAL -->
+
+            <section class="tasks-container">
+
+                <div class="tasks-title">
+
+                    <div>
+                        <h2>Minhas tarefas</h2>
+
+                        <p>
+                            Gerencie suas atividades.
+                        </p>
+                    </div>
+
+
+                    <select id="filter">
+
+                        <option value="all">
+                            Todas
+                        </option>
+
+                        <option value="pending">
+                            Pendentes
+                        </option>
+
+                        <option value="completed">
+                            Concluídas
+                        </option>
+
+                    </select>
+
+                </div>
+
+
+                <!-- FORMULÁRIO -->
+
+                <div class="task-form">
+
+                    <input
+                        type="text"
+                        id="taskInput"
+                        placeholder="Digite uma nova tarefa..."
+                    >
+
+                    <input
+                        type="date"
+                        id="taskDate"
+                    >
+
+                    <button id="addTask">
+                        Adicionar
+                    </button>
+
+                </div>
+
+
+                <!-- LISTA -->
+
+                <div id="taskList">
+
+                    <div class="empty">
+                        Nenhuma tarefa por enquanto.
+                    </div>
+
+                </div>
+
+            </section>
+
+        </main>
+
     </div>
-    </main>
+
+
     <script src="home.js"></script>
+
+</body>
+
+</html>
