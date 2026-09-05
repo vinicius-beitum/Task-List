@@ -1,0 +1,593 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+body {
+    min-height: 100vh;
+
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: linear-gradient(
+        135deg,
+        #071b49,
+        #0d3b8f
+    );
+}
+
+
+/* APLICAÇÃO */
+
+.app {
+    width: 1200px;
+
+    min-height: 700px;
+
+    margin: 40px auto;
+
+    display: flex;
+
+    background: #f6f8fc;
+
+    border-radius: 25px;
+
+    overflow: hidden;
+
+    box-shadow:
+        0 20px 50px rgba(0, 0, 0, 0.35);
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+    width: 230px;
+
+    padding: 35px 20px;
+
+    background: linear-gradient(
+        160deg,
+        #071b49,
+        #123b8f
+    );
+
+    color: white;
+
+    display: flex;
+
+    flex-direction: column;
+}
+
+
+/* LOGO */
+
+.logo {
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 0 10px;
+
+    margin-bottom: 50px;
+}
+
+
+.logo-icon {
+    width: 38px;
+
+    height: 38px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border-radius: 10px;
+
+    background: white;
+
+    color: #1456d9;
+
+    font-size: 20px;
+
+    font-weight: bold;
+}
+
+
+.logo h2 {
+    font-size: 21px;
+}
+
+
+/* MENU */
+
+nav {
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+
+nav a {
+    padding: 13px 15px;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    color: #c8d5ee;
+
+    text-decoration: none;
+
+    font-size: 14px;
+
+    transition: 0.3s;
+}
+
+
+nav a:hover,
+nav a.active {
+    background: rgba(255, 255, 255, 0.12);
+
+    color: white;
+}
+
+
+nav a.active {
+    border-left: 3px solid white;
+}
+
+
+.sidebar-bottom {
+    margin-top: auto;
+
+    padding: 15px;
+
+    color: #9fb2d5;
+
+    font-size: 12px;
+}
+
+
+/* CONTEÚDO */
+
+.content {
+    flex: 1;
+
+    padding: 40px;
+}
+
+
+/* TOPO */
+
+.top {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 30px;
+}
+
+
+.top h1 {
+    color: #102452;
+
+    font-size: 28px;
+
+    margin-bottom: 7px;
+}
+
+
+.top p {
+    color: #526789;
+
+    font-size: 14px;
+}
+
+
+.new-task {
+    padding: 13px 20px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    background: linear-gradient(
+        135deg,
+        #123b8f,
+        #1456d9
+    );
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.3s;
+}
+
+
+.new-task:hover {
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 8px 20px rgba(20, 86, 217, 0.3);
+}
+
+
+/* ESTATÍSTICAS */
+
+.stats {
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 18px;
+
+    margin-bottom: 25px;
+}
+
+
+.stat-card {
+    padding: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    background: white;
+
+    border-radius: 15px;
+
+    border: 1px solid #e1e7f1;
+}
+
+
+.stat-icon {
+    width: 45px;
+
+    height: 45px;
+
+    border-radius: 12px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    font-weight: bold;
+
+    font-size: 19px;
+}
+
+
+.stat-icon.blue {
+    background: #eef3ff;
+
+    color: #1456d9;
+}
+
+
+.stat-icon.green {
+    background: #e9f8f0;
+
+    color: #159447;
+}
+
+
+.stat-icon.orange {
+    background: #fff4e5;
+
+    color: #e98b18;
+}
+
+
+.stat-card span {
+    display: block;
+
+    color: #526789;
+
+    font-size: 12px;
+
+    margin-bottom: 4px;
+}
+
+
+.stat-card strong {
+    color: #102452;
+
+    font-size: 22px;
+}
+
+
+/* CONTAINER DE TAREFAS */
+
+.tasks-container {
+    padding: 25px;
+
+    background: white;
+
+    border-radius: 15px;
+
+    border: 1px solid #e1e7f1;
+}
+
+
+.tasks-title {
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 22px;
+}
+
+
+.tasks-title h2 {
+    color: #102452;
+
+    font-size: 20px;
+
+    margin-bottom: 5px;
+}
+
+
+.tasks-title p {
+    color: #526789;
+
+    font-size: 13px;
+}
+
+
+#filter {
+    padding: 9px 12px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 8px;
+
+    color: #526789;
+
+    outline: none;
+}
+
+
+/* FORMULÁRIO */
+
+.task-form {
+    display: flex;
+
+    gap: 10px;
+
+    margin-bottom: 25px;
+}
+
+
+.task-form input {
+    height: 45px;
+
+    padding: 0 13px;
+
+    border: 1px solid #cbd5e1;
+
+    border-radius: 9px;
+
+    outline: none;
+
+    color: #333;
+}
+
+
+#taskInput {
+    flex: 1;
+}
+
+
+.task-form input:focus {
+    border-color: #1456d9;
+
+    box-shadow:
+        0 0 3px rgba(20, 86, 217, 0.12);
+}
+
+
+#addTask {
+    height: 45px;
+
+    padding: 0 18px;
+
+    border: none;
+
+    border-radius: 9px;
+
+    background: #1456d9;
+
+    color: white;
+
+    font-weight: bold;
+
+    cursor: pointer;
+}
+
+
+#addTask:hover {
+    background: #123b8f;
+}
+
+
+/* TAREFA */
+
+.task {
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    padding: 15px;
+
+    margin-bottom: 10px;
+
+    border-radius: 10px;
+
+    background: #f7f9fd;
+
+    border: 1px solid #e2e8f2;
+}
+
+
+.task-left {
+    display: flex;
+
+    align-items: center;
+
+    gap: 13px;
+}
+
+
+.task-left input {
+    width: 18px;
+
+    height: 18px;
+
+    accent-color: #1456d9;
+}
+
+
+.task-name {
+    color: #102452;
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+
+.task-date {
+    margin-top: 4px;
+
+    color: #7a8ba6;
+
+    font-size: 12px;
+}
+
+
+.task.completed .task-name {
+    text-decoration: line-through;
+
+    color: #9ba8ba;
+}
+
+
+.delete {
+    border: none;
+
+    background: transparent;
+
+    color: #1456d9;
+
+    cursor: pointer;
+
+    font-weight: bold;
+}
+
+
+.delete:hover {
+    color: #071b49;
+}
+
+
+/* VAZIO */
+
+.empty {
+    text-align: center;
+
+    padding: 40px;
+
+    color: #8a98ad;
+
+    font-size: 14px;
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 1000px) {
+
+    .app {
+        width: 95%;
+
+        margin: 20px auto;
+    }
+
+    .sidebar {
+        width: 200px;
+    }
+
+}
+
+
+@media (max-width: 750px) {
+
+    .app {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+
+        padding: 20px;
+    }
+
+    .logo {
+        margin-bottom: 20px;
+    }
+
+    nav {
+        flex-direction: row;
+    }
+
+    .sidebar-bottom {
+        display: none;
+    }
+
+    .content {
+        padding: 25px;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    .task-form {
+        flex-direction: column;
+    }
+
+    .top {
+        align-items: flex-start;
+
+        gap: 15px;
+
+        flex-direction: column;
+    }
+
+}
