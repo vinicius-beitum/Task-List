@@ -28,34 +28,38 @@
 
         <h1>Entrar na sua conta </h1>
 
-            <div class="input-mail">
-                <input type="email"  id="email" placeholder="Digite seu Email">
-                <i class="fa-solid fa-user"></i>
-            </div>
+        <div class="input-mail">
+            <input type="email"  id="email" placeholder="Digite seu Email">
+            <i class="fa-solid fa-user"></i>
+        </div>
+             
+        <span  class="error" id="erroEmail"></span>
 
-            <div class="input-password">
-                <input type="password"  id="senha" placeholder="Digite uma senha">
-                <i class="fa-solid fa-eye" id="mostrarSenha"></i>
-            </div>
+         <div class="input-password">             
+            <input type="password"  id="senha" placeholder="Digite uma senha">
+            <i class="fa-solid fa-eye" id="verSenha"></i>
+        </div>
 
-            <div class="remember-password">
+        <span  class="error" id="erroSenha"></span>
 
-                <label for="">
-                    <input type="checkbox" id="lembrar">
-                    Lembrar minha senha
-                </label>
+        <div class="remember-password">
 
-                <a href="#">Esqueci minha senha</a>
-            </div>
+             <label for="lembrar">
+                <input type="checkbox" id="lembrar">
+                Lembrar minha senha
+            </label>
 
-            <div class="button-login">
-                <button type="submit">Login</button>
-            </div>
+        <a href="#">Esqueci minha senha</a>
+         </div>
 
-            <div class="register">
-                <p>Não tenho uma conta <a href="">Cadastre-se</a></p>
-            </div>
-    </form>
+        <div class="button-login">
+            <button type="submit">Login</button>
+        </div>
+
+        <div class="register">
+             <p>Não tenho uma conta <a href="">Cadastre-se</a></p>    
+        </div>
+</form>
 
 </main>
 <script src="login.js"></script>

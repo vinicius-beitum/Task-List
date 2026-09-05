@@ -3,12 +3,12 @@ const formulario = document.getElementById("loginForm");
 const email = document.getElementById("email");
 const senha = document.getElementById("senha");
 const lembrar = document.getElementById("lembrar");
-const mostrarSenha = document.getElementById("mostrarSenha");
+const verSenha = document.getElementById("verSenha");
+const erroEmail = document.getElementById("erroEmail");
+const erroSenha = document.getElementById("erroSenha");
 
-
-// =====================================
 // CARREGAR E-MAIL SALVO
-// =====================================
+
 
 window.addEventListener("load", function() {
 
@@ -24,9 +24,7 @@ window.addEventListener("load", function() {
 });
 
 
-// =====================================
 // FORMULÁRIO DE LOGIN
-// =====================================
 
 formulario.addEventListener("submit", function(event) {
 
@@ -40,41 +38,45 @@ formulario.addEventListener("submit", function(event) {
 
     if (emailDigitado === "") {
 
-        alert("Digite seu e-mail.");
-        return;
+       erroEmail.textContent = " ⚠ Digite seu e-mail.";
+       email.classList.add("input-erro");
+
+       return;
 
     }
 
     if (senhaDigitada === "") {
 
-        alert("Digite sua senha.");
+        erroSenha.textContent = " ⚠ Digite sua senha.";
+        senha.classList.add("input-erro");
+
         return;
 
     }
 
-
-    // =====================================
     // VALIDAÇÃO DO E-MAIL
-    // =====================================
+  
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     if (!emailRegex.test(emailDigitado)) {
 
-        alert("Digite um email válido.");
-        return;
+         erroEmail.textContent = " ⚠ Digite um e-mail válido.";
+         email.classList.add("input-erro");
 
+         return;
     }
 
 
-    // =====================================
     // VALIDAÇÃO DA SENHA
-    // =====================================
+
 
     if (senhaDigitada.length < 4) {
 
-        alert("A senha deve ter pelo menos 4 caracteres!");
-        return;
+       erroSenha.textContent = " ⚠ A senha deve ter pelo menos 4 caracteres.";
+       senha.classList.add("input-erro");
+
+       return;
 
     }
 
@@ -83,19 +85,20 @@ formulario.addEventListener("submit", function(event) {
 
     if (!/[A-Z]/.test(senhaDigitada)) {
 
-        alert("A senha deve conter pelo menos uma letra maiúscula!");
-        return;
+       erroSenha.textContent = " ⚠ A senha deve conter pelo menos uma letra maiúscula.";
+       senha.classList.add("input-erro");
 
+       return;
     }
 
 
     // Letra minúscula
 
     if (!/[a-z]/.test(senhaDigitada)) {
+       erroSenha.textContent = " ⚠ A senha deve conter pelo menos uma letra minúscula.";
+       senha.classList.add("input-erro");
 
-        alert("A senha deve conter pelo menos uma letra minúscula!");
-        return;
-
+       return;
     }
 
 
@@ -103,8 +106,10 @@ formulario.addEventListener("submit", function(event) {
 
     if (!/[0-9]/.test(senhaDigitada)) {
 
-        alert("A senha deve conter pelo menos um número!");
-        return;
+         erroSenha.textContent = " ⚠ A senha deve conter pelo menos um número.";
+         senha.classList.add("input-erro");
+
+         return;
 
     }
 
@@ -113,15 +118,15 @@ formulario.addEventListener("submit", function(event) {
 
     if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
 
-        alert("A senha deve conter pelo menos um caractere especial!");
+        erroSenha.textContent = " ⚠ A senha deve conter pelo menos um caractere especial!";
+        senha.classList.add("input-erro");
+
         return;
 
     }
 
+// LEMBRAR E-MAIL
 
-    // =====================================
-    // LEMBRAR E-MAIL
-    // =====================================
 
     if (lembrar.checked) {
 
@@ -133,36 +138,42 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =====================================
-    // IR PARA A HOME
-    // =====================================
+// IR PARA A HOME
 
     window.location.href = "../home/home.html";
 
 });
 
-
-// =====================================
 // MOSTRAR / OCULTAR SENHA
-// =====================================
 
-mostrarSenha.addEventListener("click", function() {
+verSenha.addEventListener("click", function() {
 
     if (senha.type === "password") {
 
         senha.type = "text";
 
-        mostrarSenha.classList.remove("fa-eye");
-        mostrarSenha.classList.add("fa-eye-slash");
+        verSenha.classList.remove("fa-eye");
+        verSenha.classList.add("fa-eye-slash");
 
     } else {
 
         senha.type = "password";
 
-        mostrarSenha.classList.remove("fa-eye-slash");
-        mostrarSenha.classList.add("fa-eye");
+        verSenha.classList.remove("fa-eye-slash");
+        verSenha.classList.add("fa-eye");
 
     }
 
+});
+
+email.addEventListener("input", function() {
+
+   erroEmail.textContent = "";
+   email.classList.remove("input-erro");
+});
+
+senha.addEventListener("input", function() {
+
+   erroSenha.textContent = "";
+   senha.classList.remove("input-erro");
 });

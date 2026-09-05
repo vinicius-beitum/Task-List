@@ -177,3 +177,18 @@ body {
         font-size: 27px;
     }
 }
+
+.error {
+    display: block;
+    color: #d93025;
+    font-size: 13px;
+    text-align: left;
+    margin-top: -12px;
+    margin-bottom: 15px;
+    min-height: 16px;
+}
+
+.input-erro {
+    border: 1px solid #d93025 !important;
+    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1); 
+}
