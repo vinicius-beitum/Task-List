@@ -197,6 +197,35 @@ body {
        flex-direction: row-reverse;
 }
 
+.requisitos-senha {
+    display: none;
+    margin-top: -10px;
+    margin-bottom: 15px;
+    font-size: 13px;
+}
+
+.requisitos-senha.mostrar {
+    display: block;
+}
+
+.requisitos-senha p {
+    margin: 4px 0;
+    color: #777;
+}
+
+.requisitos-senha i {
+    margin-right: 6px;
+}
+
+.requisitos-senha p.valido {
+    color: #22c55e;
+}
+
+.requisitos-senha p.valido i {
+    color: #22c55e;
+}
+
+
 .register a {
     color: #1456d9;
     font-weight: bold;

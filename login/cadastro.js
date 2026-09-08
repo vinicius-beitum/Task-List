@@ -1,4 +1,4 @@
-const formulario = document.getElementById("cadastroForm")
+const formulario = document.getElementById("cadastroForm");
 
 const nome = document.getElementById("nome");
 const email = document.getElementById("emailCadastro");
@@ -7,18 +7,23 @@ const confirmarSenha = document.getElementById("confirmarSenha");
 const termos = document.getElementById("termos");
 const mostrarSenha = document.getElementById("mostrarSenhaCadastro");
 const mostrarConfirmarSenha = document.getElementById("mostrarConfirmarSenha");
+const requisitosSenha = document.querySelector(".requisitos-senha");
 
-// Mensagem de ERRO 
+const reqTamanho = document.getElementById("reqTamanho");
+const reqMaiuscula = document.getElementById("reqMaiuscula");
+const reqMinuscula = document.getElementById("reqMinuscula");
+const reqNumero = document.getElementById("reqNumero");
+const reqEspecial = document.getElementById("reqEspecial");
 
+// Mensagens de erro
 const erroNome = document.getElementById("erroNome");
 const erroEmail = document.getElementById("erroEmailCadastro");
 const erroSenha = document.getElementById("erroSenhaCadastro");
 const erroConfirmarSenha = document.getElementById("erroConfirmarSenha");
 const erroTermos = document.getElementById("erroTermos");
 
-//Enviar Formulario 
-
 formulario.addEventListener("submit", function(event) {
+
     event.preventDefault();
 
     const nomeDigitado = nome.value.trim();
@@ -26,131 +31,140 @@ formulario.addEventListener("submit", function(event) {
     const senhaDigitada = senha.value;
     const confirmarSenhaDigitada = confirmarSenha.value;
 
-// Validações 
+    // VALIDAÇÃO DO NOME
+ 
+    if (nomeDigitado === "") {
 
-if (nomeDigitado === ""){
+        erroNome.textContent = "⚠ Digite seu nome.";
+        nome.classList.add("input-erro");
 
-    erroNome.textContent = "⚠ Digite seu nome.";
-    nome.classList.add("input-erro");
+        return;
+    }
 
-    return;
-}
+    // VALIDAÇÃO DO EMAIL
 
-if(emailDigitado === "") {
+    if (emailDigitado === "") {
 
-    erroEmail.textContent = "⚠ Digite seu e-mail.";
-    email.classList.add("input-erro");
+        erroEmail.textContent = "⚠ Digite seu e-mail.";
+        email.classList.add("input-erro");
 
-    return;
-}
+        return;
+    }
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-if(!emailRegex.test(emailDigitado)) {
+    if (!emailRegex.test(emailDigitado)) {
 
-    erroEmail.textContent = "⚠ Digite um e-mail válido.";
-    email.classList.add("input-erro");
+        erroEmail.textContent = "⚠ Digite um e-mail válido.";
+        email.classList.add("input-erro");
 
-    return;
-}
+        return;
+    }
 
-if(senhaDigitada === "") {
+    // VALIDAÇÃO DA SENHA
+   
 
-    erroSenha.textContent = "⚠ Digite uma senha.";
-    senha.classList.add("input-erro");
+    if (senhaDigitada === "") {
 
-    return;
-}
+        erroSenha.textContent = "⚠ Digite uma senha.";
+        senha.classList.add("input-erro");
 
-if(senhaDigitada.length < 4) {
+        return;
+    }
 
-    erroSenha.textContent = "⚠ A senha deve ter pelo menos 4 caracteres.";
-    senha.classList.add("input-erro");
+    if (senhaDigitada.length < 4) {
 
-    return;
-}
+        erroSenha.textContent =
+            "⚠ A senha deve ter pelo menos 4 caracteres.";
 
-if (!/[A-Z]/.test(senhaDigitada)) {
+        senha.classList.add("input-erro");
 
-    erroSenha.textContent =
-        "⚠ A senha precisa ter uma letra maiúscula.";
+        return;
+    }
 
-    senha.classList.add("input-erro");
+    if (!/[A-Z]/.test(senhaDigitada)) {
 
-    return;
-}
+        erroSenha.textContent =
+            "⚠ A senha precisa ter uma letra maiúscula.";
 
-if (!/[a-z]/.test(senhaDigitada)) {
+        senha.classList.add("input-erro");
 
-    erroSenha.textContent =
-        "⚠ A senha precisa ter uma letra minúscula.";
+        return;
+    }
 
-    senha.classList.add("input-erro");
+    if (!/[a-z]/.test(senhaDigitada)) {
 
-    return;
-}
+        erroSenha.textContent =
+            "⚠ A senha precisa ter uma letra minúscula.";
 
-if (!/[0-9]/.test(senhaDigitada)) {
+        senha.classList.add("input-erro");
 
-    erroSenha.textContent =
-        "⚠ A senha precisa ter um número.";
+        return;
+    }
 
-    senha.classList.add("input-erro");
+    if (!/[0-9]/.test(senhaDigitada)) {
 
-    return;
-}
+        erroSenha.textContent =
+            "⚠ A senha precisa ter um número.";
 
-if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
+        senha.classList.add("input-erro");
 
-    erroSenha.textContent =
-        "⚠ A senha precisa ter um caractere especial.";
+        return;
+    }
 
-    senha.classList.add("input-erro");
+    if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
 
-    return;
-}
+        erroSenha.textContent =
+            "⚠ A senha precisa ter um caractere especial.";
 
-if(confirmarSenhaDigitada === "") {
+        senha.classList.add("input-erro");
 
-    erroConfirmarSenha.textContent =
-        "⚠ Confirme sua senha.";
+        return;
+    }
 
-    confirmarSenha.classList.add("input-erro");
+    // CONFIRMAR SENHA
 
-    return;
-}
+    if (confirmarSenhaDigitada === "") {
 
-if(senhaDigitada !== confirmarSenhaDigitada) {
+        erroConfirmarSenha.textContent =
+            "⚠ Confirme sua senha.";
 
-    erroConfirmarSenha.textContent =
-        "⚠ As senhas não são iguais.";
+        confirmarSenha.classList.add("input-erro");
 
-    confirmarSenha.classList.add("input-erro");
+        return;
+    }
 
-    return;
-} 
+    if (senhaDigitada !== confirmarSenhaDigitada) {
 
-if(!termos.checked) {
+        erroConfirmarSenha.textContent =
+            "⚠ As senhas não são iguais.";
 
-    erroTermos.textContent =
-        "⚠ Você precisa aceitar os termos e condições.";
+        confirmarSenha.classList.add("input-erro");
 
-    return;
-}
+        return;
+    }
 
+    // TERMOS
 
-// Cadastro realizado
+    if (!termos.checked) {
 
-alert("Conta criada com sucesso!");
+        erroTermos.textContent =
+            "⚠ Você precisa aceitar os termos e condições.";
 
-window.location.href = "login.html";
+        return;
+    }
+
+    // CADASTRO REALIZADO
+
+    alert("Conta criada com sucesso!");
+
+    window.location.href = "login.html";
 
 });
 
+// MOSTRAR / OCULTAR SENHA
 
-// Mostrar e ocultar senha
-
-mostrarSenha.addEventListener("click", function(){
+mostrarSenha.addEventListener("click", function() {
 
     if (senha.type === "password") {
 
@@ -167,14 +181,14 @@ mostrarSenha.addEventListener("click", function(){
         mostrarSenha.classList.add("fa-eye");
 
     }
+
 });
 
+// MOSTRAR / OCULTAR CONFIRMAÇÃO
 
-// Mostrar e ocultar confirmação da senha
+mostrarConfirmarSenha.addEventListener("click", function() {
 
-mostrarConfirmarSenha.addEventListener("click", function(){
-
-    if(confirmarSenha.type === "password") {
+    if (confirmarSenha.type === "password") {
 
         confirmarSenha.type = "text";
 
@@ -189,10 +203,10 @@ mostrarConfirmarSenha.addEventListener("click", function(){
         mostrarConfirmarSenha.classList.add("fa-eye");
 
     }
+
 });
 
-
-// Limpar mensagens de erro
+// LIMPAR ERRO DO NOME
 
 nome.addEventListener("input", function() {
 
@@ -201,6 +215,9 @@ nome.addEventListener("input", function() {
 
 });
 
+// LIMPAR ERRO DO EMAIL
+
+
 email.addEventListener("input", function() {
 
     erroEmail.textContent = "";
@@ -208,12 +225,114 @@ email.addEventListener("input", function() {
 
 });
 
+// REQUISITOS DA SENHA
+
 senha.addEventListener("input", function() {
+
+    const valor = senha.value;
+
+
+    // Mostrar requisitos somente quando digitar
+
+    if (valor.length > 0) {
+
+        requisitosSenha.classList.add("mostrar");
+
+    } else {
+
+        requisitosSenha.classList.remove("mostrar");
+
+    }
+
+    if (valor.length >= 4) {
+
+        reqTamanho.classList.add("valido");
+
+        reqTamanho.querySelector("i").classList.remove("fa-circle-xmark");
+        reqTamanho.querySelector("i").classList.add("fa-circle-check");
+
+    } else {
+
+        reqTamanho.classList.remove("valido");
+
+        reqTamanho.querySelector("i").classList.remove("fa-circle-check");
+        reqTamanho.querySelector("i").classList.add("fa-circle-xmark");
+
+    }
+
+    if (/[A-Z]/.test(valor)) {
+
+        reqMaiuscula.classList.add("valido");
+
+        reqMaiuscula.querySelector("i").classList.remove("fa-circle-xmark");
+        reqMaiuscula.querySelector("i").classList.add("fa-circle-check");
+
+    } else {
+
+        reqMaiuscula.classList.remove("valido");
+
+        reqMaiuscula.querySelector("i").classList.remove("fa-circle-check");
+        reqMaiuscula.querySelector("i").classList.add("fa-circle-xmark");
+
+    }
+
+    if (/[a-z]/.test(valor)) {
+
+        reqMinuscula.classList.add("valido");
+
+        reqMinuscula.querySelector("i").classList.remove("fa-circle-xmark");
+        reqMinuscula.querySelector("i").classList.add("fa-circle-check");
+
+    } else {
+
+        reqMinuscula.classList.remove("valido");
+
+        reqMinuscula.querySelector("i").classList.remove("fa-circle-check");
+        reqMinuscula.querySelector("i").classList.add("fa-circle-xmark");
+
+    }
+
+    if (/[0-9]/.test(valor)) {
+
+        reqNumero.classList.add("valido");
+
+        reqNumero.querySelector("i").classList.remove("fa-circle-xmark");
+        reqNumero.querySelector("i").classList.add("fa-circle-check");
+
+    } else {
+
+        reqNumero.classList.remove("valido");
+
+        reqNumero.querySelector("i").classList.remove("fa-circle-check");
+        reqNumero.querySelector("i").classList.add("fa-circle-xmark");
+
+    }
+
+    if (/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(valor)) {
+
+        reqEspecial.classList.add("valido");
+
+        reqEspecial.querySelector("i").classList.remove("fa-circle-xmark");
+        reqEspecial.querySelector("i").classList.add("fa-circle-check");
+
+    } else {
+
+        reqEspecial.classList.remove("valido");
+
+        reqEspecial.querySelector("i").classList.remove("fa-circle-check");
+        reqEspecial.querySelector("i").classList.add("fa-circle-xmark");
+
+    }
+
+
+    // Limpar mensagem de erro
 
     erroSenha.textContent = "";
     senha.classList.remove("input-erro");
 
 });
+
+// LIMPAR ERRO DA CONFIRMAÇÃO
 
 confirmarSenha.addEventListener("input", function() {
 
@@ -221,6 +340,8 @@ confirmarSenha.addEventListener("input", function() {
     confirmarSenha.classList.remove("input-erro");
 
 });
+
+// LIMPAR ERRO DOS TERMOS
 
 termos.addEventListener("change", function() {
 
