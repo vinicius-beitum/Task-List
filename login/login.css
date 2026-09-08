@@ -251,217 +251,249 @@ body {
     }
 }
 
-/* ============================= */
 /* TELA DE CARREGAMENTO */
-/* ============================= */
 
 .login-loading {
 
     position: fixed;
-
     top: 0;
     left: 0;
-
     width: 100%;
     height: 100%;
-
     background: rgba(0, 0, 0, 0.45);
-
     display: none;
-
     justify-content: center;
     align-items: center;
-
     z-index: 9999;
 }
 
 .login-loading.mostrar {
-
     display: flex;
 }
 
-
-/* Caixa do loading */
-
 .loading-box {
-
     width: 220px;
-
     padding: 30px;
-
     background: white;
-
     border-radius: 15px;
-
     text-align: center;
-
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
 }
 
-
-/* Bolinha */
-
 .spinner {
-
     width: 45px;
     height: 45px;
-
     margin: 0 auto 15px;
-
     border: 5px solid #dbe4f5;
-
     border-top: 5px solid #1456d9;
-
     border-radius: 50%;
-
     animation: girar 0.8s linear infinite;
 }
 
 
 .loading-box p {
-
     color: #102452;
-
     font-size: 16px;
-
     font-weight: bold;
 }
 
 
 @keyframes girar {
-
     from {
-
         transform: rotate(0deg);
-
     }
-
     to {
-
         transform: rotate(360deg);
-
     }
-
 }
 
-
-/* ============================= */
 /* TELA DE SUCESSO */
-/* ============================= */
 
 .login-sucesso {
-
     position: fixed;
-
     top: 0;
     left: 0;
-
     width: 100%;
     height: 100%;
-
     background: rgba(0, 0, 0, 0.45);
-
     display: none;
-
     justify-content: center;
     align-items: center;
-
     z-index: 10000;
 }
 
 
 .login-sucesso.mostrar {
-
     display: flex;
 }
 
-
-/* Caixa de sucesso */
-
 .sucesso-box {
-
     width: 300px;
-
     padding: 35px;
-
     background: white;
-
     border-radius: 18px;
-
     text-align: center;
-
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-
     animation: aparecer 0.3s ease;
 }
 
-
-/* Círculo verde */
-
 .check {
-
     width: 65px;
     height: 65px;
-
     margin: 0 auto 15px;
-
     border-radius: 50%;
-
     background: #22c55e;
-
     display: flex;
-
     justify-content: center;
     align-items: center;
 }
 
 
 .check i {
-
     color: white;
-
     font-size: 32px;
 }
 
-
-/* Texto */
-
 .sucesso-box h2 {
-
     color: #102452;
-
     margin-bottom: 8px;
-
     font-size: 22px;
 }
 
 
 .sucesso-box p {
-
     color: #777;
-
     font-size: 14px;
 }
 
-
-/* Animação */
-
 @keyframes aparecer {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* LOADING DO CADASTRO */
+
+.cadastro-loading {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.cadastro-loading.mostrar {
+    display: flex;
+}
+
+.cadastro-loading .loading-box {
+    width: 230px;
+    padding: 30px;
+    background: white;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+}
+
+.cadastro-loading .spinner {
+    width: 45px;
+    height: 45px;
+    margin: 0 auto 15px;
+    border: 5px solid #dbe4f5;
+    border-top: 5px solid #1456d9;
+    border-radius: 50%;
+    animation: girarCadastro 0.8s linear infinite;
+}
+
+.cadastro-loading p {
+    color: #102452;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+@keyframes girarCadastro {
 
     from {
-
-        opacity: 0;
-
-        transform: scale(0.8);
-
+        transform: rotate(0deg);
     }
-
     to {
-
-        opacity: 1;
-
-        transform: scale(1);
-
+        transform: rotate(360deg);
     }
+}
 
+/* sucesso cadastro */
+
+.cadastro-sucesso {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    display: none;
+    justify-content: center;
+    align-items:center ;
+    z-index: 10000;
+}
+
+.cadastro-sucesso.mostrar {
+    display: flex;
+}
+
+.cadastro-sucesso .sucesso-box {
+    width:320px;
+    padding: 35px;
+    background: white;
+    border-radius: 18px;
+    text-align: center;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    animation: aparecerCadastro 0.3 ease;
+}
+
+.cadastro-sucesso .check {
+    width: 65px;
+    height: 65px;
+    margin:  0 auto 15px;
+    border-radius:  50%; 
+    background: #22c55e;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.cadastro-sucesso .check i {
+    color: white;
+    font-size: 32px;
+}
+
+.cadastro-sucesso h2 {
+    color: #102452;
+    margin-bottom: 8px;
+    font-size: 22px;
+}
+
+.cadastro-sucesso p {
+    color: #777;
+    font-size: 14px ;
+}
+
+@keyframes aparecerCadastro {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }

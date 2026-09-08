@@ -15,6 +15,9 @@ const reqMinuscula = document.getElementById("reqMinuscula");
 const reqNumero = document.getElementById("reqNumero");
 const reqEspecial = document.getElementById("reqEspecial");
 
+const cadastroLoading = document.getElementById("cadastroLoading");
+const cadastroSucesso = document.getElementById("cadastroSucesso");
+
 // Mensagens de erro
 const erroNome = document.getElementById("erroNome");
 const erroEmail = document.getElementById("erroEmailCadastro");
@@ -156,9 +159,23 @@ formulario.addEventListener("submit", function(event) {
 
     // CADASTRO REALIZADO
 
-    alert("Conta criada com sucesso!");
+  // MOSTRAR TELA DE SUCESSO
 
-    window.location.href = "login.html";
+cadastroLoading.classList.add("mostrar");
+
+setTimeout(function() {
+
+    cadastroLoading.classList.remove("mostrar");
+
+    cadastroSucesso.classList.add("mostrar");
+
+    setTimeout(function() {
+
+        window.location.href = "login.html";
+
+    }, 1500);
+
+}, 1500);
 
 });
 
