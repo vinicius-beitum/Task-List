@@ -11,10 +11,7 @@ const erroSenha = document.getElementById("erroSenha");
 const loginLoading = document.getElementById("loginLoading");
 const loginSucesso = document.getElementById("loginSucesso");
 
-
-// =============================
 // CARREGAR E-MAIL SALVO
-// =============================
 
 window.addEventListener("load", function() {
 
@@ -30,10 +27,8 @@ window.addEventListener("load", function() {
 
 });
 
-
-// =============================
 // FORMULÁRIO DE LOGIN
-// =============================
+
 
 formulario.addEventListener("submit", function(event) {
 
@@ -44,10 +39,8 @@ formulario.addEventListener("submit", function(event) {
 
     const senhaDigitada = senha.value;
 
-
-    // =============================
     // VERIFICAR E-MAIL
-    // =============================
+ 
 
     if (emailDigitado === "") {
 
@@ -59,10 +52,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // VERIFICAR SENHA
-    // =============================
 
     if (senhaDigitada === "") {
 
@@ -74,10 +64,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // VALIDAR E-MAIL
-    // =============================
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -92,10 +79,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // VALIDAR TAMANHO DA SENHA
-    // =============================
 
     if (senhaDigitada.length < 4) {
 
@@ -108,10 +92,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // LETRA MAIÚSCULA
-    // =============================
 
     if (!/[A-Z]/.test(senhaDigitada)) {
 
@@ -124,10 +105,8 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // LETRA MINÚSCULA
-    // =============================
+
 
     if (!/[a-z]/.test(senhaDigitada)) {
 
@@ -140,10 +119,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // NÚMERO
-    // =============================
 
     if (!/[0-9]/.test(senhaDigitada)) {
 
@@ -156,10 +132,7 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-
-    // =============================
     // CARACTERE ESPECIAL
-    // =============================
 
     if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
 
