@@ -9,6 +9,19 @@ const mostrarSenha = document.getElementById("mostrarSenhaCadastro");
 const mostrarConfirmarSenha = document.getElementById("mostrarConfirmarSenha");
 const requisitosSenha = document.querySelector(".requisitos-senha");
 
+const abrirTermos = document.getElementById("abrirTermos");
+const abrirPrivacidade = document.getElementById("abrirPrivacidade");
+const modalTermos = document.getElementById("modalTermos");
+const modalPrivacidade = document.getElementById("modalPrivacidade");
+const fecharTermos = document.getElementById("fecharTermos");
+const fecharPrivacidade = document.getElementById("fecharPrivacidade");
+const botaoFecharTermos = document.getElementById("botaoFecharTermos");
+const botaoFecharPrivacidade = document.getElementById("botaoFecharPrivacidade")
+
+const forcaSenha =document.getElementById("forcaSenha");
+const progressoForca = document.getElementById("progressoForca");
+const textoForca = document.getElementById("textoForca");
+
 const reqTamanho = document.getElementById("reqTamanho");
 const reqMaiuscula = document.getElementById("reqMaiuscula");
 const reqMinuscula = document.getElementById("reqMinuscula");
@@ -366,4 +379,135 @@ termos.addEventListener("change", function() {
 
 });
 
+senha.addEventListener("input", function() {
 
+    const valor = senha.value;
+
+    let pontos = 0;
+
+    if (valor.length >= 4) {
+        
+        pontos++;
+    }
+
+    if (/[A-Z]/.test(valor)) {
+        
+        pontos++;
+    }
+
+    if (/[a-z]/.test(valor)) {
+
+        pontos++;
+    }
+
+    if (/[0-9]/.test(valor)) {
+
+        pontos++;
+    }
+
+      if (/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(valor)) {
+
+        pontos++;
+    }
+
+    if (valor.length > 0) {
+
+        forcaSenha.classList.add("mostrar");
+    
+    } else {
+
+        forcaSenha.classList.remove("mostrar");
+        progressoForca.style.width = "0%";
+        textoForca.textContent = "Muito Fraca";
+
+        return;
+    }
+
+    if (pontos <= 1) {
+
+        progressoForca.style.width = "20%";
+        textoForca.textContent = "Muito Fraca";
+    }
+
+    else if (pontos === 2) {
+
+        progressoForca.style.width = "40%";
+        textoForca.textContent = "Fraca";
+    } 
+
+    else if (pontos === 3 ) {
+
+        progressoForca.style.width = "60%";
+        textoForca.textContent = "Média"
+    }
+    else if (pontos === 4 ) {
+
+        progressoForca.style.width = "80%"
+        textoForca.textContent = "Boa"
+    }
+    else {
+        progressoForca.style.width = "100%";
+        textoForca.textContent = "Forte"
+    }
+});
+
+
+//ABRIR TERMOS 
+
+abrirTermos.addEventListener("click", function(event) {
+
+    event.preventDefault();
+    modalTermos.classList.add("mostrar")
+});
+
+//FECHAR TERMOS 
+
+fecharTermos.addEventListener("click", function(event) {
+    event.preventDefault();
+    modalTermos.classList.remove("mostrar");
+})
+
+botaoFecharTermos.addEventListener("click", function() {
+    
+    modalTermos.classList.remove("mostrar");
+
+});
+
+
+// ABRIR PRIVACIDADE
+
+abrirPrivacidade.addEventListener("click", function(event) {
+    event.preventDefault();
+    modalPrivacidade.classList.add("mostrar");
+
+});
+
+// FECHAR PRIVACIDADE
+
+fecharPrivacidade.addEventListener("click", function() {
+    modalPrivacidade.classList.remove("mostrar");
+
+});
+
+botaoFecharPrivacidade.addEventListener("click", function() {
+    modalPrivacidade.classList.remove("mostrar");
+
+});
+
+// FECHAR CLICANDO FORA
+
+modalTermos.addEventListener("click", function(event) {
+
+    if (event.target === modalTermos) {
+        modalTermos.classList.remove("mostrar");
+    }
+
+});
+
+modalPrivacidade.addEventListener("click", function(event) {
+
+    if (event.target === modalPrivacidade) {
+        modalPrivacidade.classList.remove("mostrar");
+    }
+
+});

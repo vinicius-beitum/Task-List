@@ -14,7 +14,7 @@ body {
 }
  .container {
     width: 900px;
-    height: 600px;
+    height: 700px;
     display: flex;
     background: white;
     border-radius: 25px;
@@ -52,7 +52,7 @@ body {
 
 .container form {
     width: 60%;
-    padding: 50px 60px; 
+    padding: 35px 60px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -61,21 +61,21 @@ body {
 .container h1 {
     font-size: 32px;
     color: #102452;
-    margin-bottom: 40px;
+    margin-bottom: 25px;
 }
 
 .input-mail,
 .input-password  {
     width: 100%;
-    height: 55px;
+    height: 50px;
     position: relative;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 
 .input-mail input,
 .input-password input {
     width: 100%;
-    height: 120%;
+    height: 100%;
     padding: 0 55px ;
     border: 1px solid #cbd5e1;
     border-radius: 10px;
@@ -200,8 +200,8 @@ body {
 
 .requisitos-senha {
     display: none;
-    margin-top: -10px;
-    margin-bottom: 15px;
+    margin-top: -4px;
+    margin-bottom: 10px;
     font-size: 13px;
 }
 
@@ -210,7 +210,7 @@ body {
 }
 
 .requisitos-senha p {
-    margin: 4px 0;
+    margin: 2px 0;
     color: #777;
 }
 
@@ -225,12 +225,20 @@ body {
 .requisitos-senha p.valido i {
     color: #22c55e;
 }
-
-
+.register {
+    text-align: center;
+    margin-top: 18px;
+}
+.register p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
 .register a {
     color: #1456d9;
     font-weight: bold;
     text-decoration: none;
+    transition: 0.3s;
 }
 
 .register a:hover {
@@ -241,6 +249,15 @@ body {
     .container{
         width: 90%;
         min-height: auto;
+        flex-direction: column;
+    }
+    .welcome {
+        width: 100%;
+        padding: 35px;
+    }
+    .welcome i {
+        margin-top: 25px;
+        font-size: 50px;
     }
     .container form {
         width: 100%;
@@ -248,6 +265,7 @@ body {
     }
     .container h1 {
         font-size: 27px;
+        margin-bottom: 25px;
     }
 }
 
@@ -491,6 +509,203 @@ body {
     from {
         opacity: 0;
         transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* FORÇA DA SENHA */
+
+.forca-senha {
+    display: none;
+    margin-top: -3px;
+    margin-bottom: 12px;
+    font-size: 13px;
+}
+
+.forca-senha.mostrar {
+    display: block;
+}
+
+.forca-topo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.forca-topo span:first-child {
+    color: #777;
+}
+
+#textoForca {
+    font-weight: bold;
+}
+
+.barra-forca {
+    width: 100%;
+    height: 7px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progresso-forca {
+    width: 0%;
+    height: 100%;
+    border-radius: 10px;
+    transition: 0.4s ease;
+}
+
+/* TERMOS E CONDICÕES*/
+
+.termos {
+    margin-top: 10px;
+    margin-bottom: 20px;
+}
+
+.termos label {
+    display: flex;
+    align-items: flex-start;
+    gap: 9px;
+    color: #555;
+    font-size: 13px;
+    line-height: 1.5;
+    cursor: pointer;
+}
+
+.termos input[type="checkbox"] {
+    width: 17px;
+    height: 17px;
+    margin-top: 2px;
+    cursor: pointer;
+    accent-color: #1456d9;
+}
+
+.termos a {
+    color: #1456d9;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.termos a:hover {
+    text-decoration: underline;
+}
+
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.55);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    z-index: 20000;
+}
+
+.modal.mostrar {
+    display: flex;
+}
+
+.modal-box {
+    position: relative;
+
+    width: 500px;
+    max-width: 100%;
+    max-height: 85vh;
+    overflow-y: auto;
+    background: white;
+    border-radius: 20px;
+    padding: 35px;
+    text-align: left;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    animation: aparecerModal 0.3s ease;
+}
+
+.modal-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 15px;
+    border-radius: 50%;
+    background: #e8f0ff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-icon i {
+    color: #1456d9;
+    font-size: 27px;
+}
+
+.modal-box h2 {
+    text-align: center;
+    color: #102452;
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+.modal-box h3 {
+    color: #102452;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 7px;
+}
+
+.modal-box p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+.fechar-modal {
+    position: absolute;
+    top: 15px;
+    right: 18px;
+    width: 35px;
+    height: 35px;
+    border: none;
+    background: transparent;
+    color: #777;
+    font-size: 20px;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.fechar-modal:hover {
+    background: #f1f1f1;
+    color: #d93025;
+}
+
+.botao-fechar {
+    width: 100%;
+    height: 45px;
+    margin-top: 20px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg,#123b8f, #1456d9);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.botao-fechar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(20, 86, 217, 0.3);
+}
+
+@keyframes aparecerModal {
+    from {
+        opacity: 0;
+        transform: scale(0.85);
     }
     to {
         opacity: 1;

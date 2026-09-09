@@ -80,12 +80,39 @@
         <i class="fa-solid fa-eye" id="mostrarConfirmarSenha"></i>
     </div>
 
+    <div class="forca-senha" id="forcaSenha">
+
+    <!--força da senha -->
+
+        <div class="forca-topo">
+            <span>Força da Senha</span>
+            
+            <span id="textoForca">
+                Muito Fraca
+            </span>
+
+        </div>
+
+        <div class="barra-forca">
+
+            <div class="progresso-forca" id="progressoForca"></div>
+
+        </div>
+    </div>
+
     <span class="erro" id="erroConfirmarSenha"></span>
 
     <div class="remember-password">
         <label>
             <input type="checkbox" id="termos">
-            Aceito os termos e condições.
+           
+            <span>
+                Li e aceito os 
+                <a href="#" id="abrirTermos">Termos e Condições</a>
+                e a 
+                <a href="#" id="abrirPrivacidade">Políticas de Privacidade</a>
+            </span>
+
         </label>
     </div>
 
@@ -95,16 +122,16 @@
         <button type="submit">Cria Conta</button>
     </div>
 
-    <div class="Register">
-        <p> Já tem uma conta ?</p>
-        <a href="login.html">Faça login</a>
+    <div class="register">
+        <p> Já possui uma conta ?</p>
+        <a href="login.html"> Entrar na Minha Conta </a>
     </div>
 
     </form>
 
 </main>
 
-   <!-- TELA DE CARREGAMENTO -->
+    <!-- TELA DE CARREGAMENTO -->
 
 <div class="cadastro-loading" id="cadastroLoading">
 
@@ -117,7 +144,6 @@
     </div>
 
 </div>
-
 
 <div class="cadastro-sucesso" id="cadastroSucesso">
 
@@ -133,6 +159,88 @@
 
     </div>
 
+</div>
+
+<!--Modal termos e condições-->
+
+<div class="modal" id="modalTermos">
+
+    <div class="modal-box">
+
+        <button class="fechar-modal" id="fecharTermos">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-icon">
+            <i class="fa-solid fa-file-contract"></i> 
+        </div>
+
+        <h2>Termos e Condições</h2>
+
+        <p>
+            Ao criar uma conta, você cocncorda em utilizar nossa
+            plataforma de forma responsável e de acordo com as 
+            regras estabelecidas.
+        </p>
+
+        <h3>Uso da Plataforma</h3>
+
+        <p>
+            O usúario é responsável pelas informações fornecídas
+            durante o cadastro e pelo uso de sua conta.
+        </p>
+
+        <h3>Segurnaça</h3>
+
+        <p>
+            Recomendamos que você mantenha sua senha segura e 
+            não compartilhe seus dados de acesso com outras pessoas.
+        </p>
+
+        <button class="botao-fechar" id="botaoFecharTermos">
+            Entendi
+        </button>
+    </div>
+</div>
+
+<div class="modal" id="modalPrivacidade">
+
+    <div class="modal-box">
+
+        <button class="fechar-modal" id="fecharPrivacidade">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <h2>Política de Privacidade</h2>
+
+         <p>
+            Prezamos pela privacidade e segurança das informações
+            fornecidas pelos usúarios durante a utilização da plataforma.
+        </p>
+
+        <h3>Dados pessoais</h3>
+
+        <p>
+            As informações fornecidas no cadasto devem ser utilizadas
+            apenas para as finalidades relacionadas ao funcionamento
+            da plataforma.
+        </p>
+
+        <h3>Proteção</h3>
+
+        <p>
+            Recomendamos que o usúario mantenha seus dados de acesso 
+            protegidos e não compartilhe sua senha.
+        </p>
+
+        <button class="botao-fechar" id="botaoFecharPrivacidade">
+            Entendi
+        </button>
+    </div>
 </div>
 
 <script src="cadastro.js"></script>
