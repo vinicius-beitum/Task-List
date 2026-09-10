@@ -1,6 +1,8 @@
 const formulario = document.getElementById("loginForm");
 
 const email = document.getElementById("email");
+const saudacaoLogin = document.getElementById("saudacaoLogin");
+const emailSalvoLogin = document.getElementById("emailSalvoLogin");
 const senha = document.getElementById("senha");
 const lembrar = document.getElementById("lembrar");
 const verSenha = document.getElementById("verSenha");
@@ -10,6 +12,13 @@ const erroSenha = document.getElementById("erroSenha");
 
 const loginLoading = document.getElementById("loginLoading");
 const loginSucesso = document.getElementById("loginSucesso");
+
+function campoComErro(campo) {
+    
+    campo.classList.remove("campo-tremer");
+    void campo.offsetWidth;
+    campo.classList.add("campo-treme");
+}
 
 // CARREGAR E-MAIL SALVO
 
@@ -23,8 +32,10 @@ window.addEventListener("load", function() {
 
         lembrar.checked = true;
 
-    }
+        saudacaoLogin.querySelector("h1").textContent = "Olá Novamente! 💪"
+        
 
+    }
 });
 
 // FORMULÁRIO DE LOGIN
@@ -47,6 +58,7 @@ formulario.addEventListener("submit", function(event) {
         erroEmail.textContent = "⚠ Digite seu e-mail.";
 
         email.classList.add("input-erro");
+        campoComErro(email);
 
         return;
 
@@ -59,6 +71,7 @@ formulario.addEventListener("submit", function(event) {
         erroSenha.textContent = "⚠ Digite sua senha.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha);
 
         return;
 
@@ -74,6 +87,7 @@ formulario.addEventListener("submit", function(event) {
         erroEmail.textContent = "⚠ Digite um e-mail válido.";
 
         email.classList.add("input-erro");
+        campoComErro(email);
 
         return;
 
@@ -87,6 +101,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve ter pelo menos 4 caracteres.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
 
@@ -100,6 +115,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve conter pelo menos uma letra maiúscula.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
 
@@ -114,6 +130,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve conter pelo menos uma letra minúscula.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
 
@@ -127,6 +144,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve conter pelo menos um número.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
 
@@ -140,6 +158,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve conter pelo menos um caractere especial.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
 
@@ -230,4 +249,21 @@ senha.addEventListener("input", function() {
 
     senha.classList.remove("input-erro");
 
+});
+
+
+email.addEventListener("keydown" , function(event) {
+
+    if(event.key === "Enter") {
+        event.preventDefault();
+        senha.focus()
+    }
+});
+
+senha.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+        event.preventDefault();
+        formulario.requestSubmit()
+    }
 });

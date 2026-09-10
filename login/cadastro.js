@@ -1,6 +1,7 @@
 const formulario = document.getElementById("cadastroForm");
 
 const nome = document.getElementById("nome");
+const iconeNome = document.getElementById("iconeNome")
 const email = document.getElementById("emailCadastro");
 const senha = document.getElementById("senhaCadastro");
 const confirmarSenha = document.getElementById("confirmarSenha");
@@ -38,6 +39,18 @@ const erroSenha = document.getElementById("erroSenhaCadastro");
 const erroConfirmarSenha = document.getElementById("erroConfirmarSenha");
 const erroTermos = document.getElementById("erroTermos");
 
+// ANIMAÇÃO DE ERRO
+
+function campoComErro(campo) {
+
+    campo.classList.remove("campo-treme");
+
+    void campo.offsetWidth;
+
+    campo.classList.add("campo-treme");
+
+}
+
 formulario.addEventListener("submit", function(event) {
 
     event.preventDefault();
@@ -53,6 +66,7 @@ formulario.addEventListener("submit", function(event) {
 
         erroNome.textContent = "⚠ Digite seu nome.";
         nome.classList.add("input-erro");
+        campoComErro(nome);
 
         return;
     }
@@ -63,6 +77,7 @@ formulario.addEventListener("submit", function(event) {
 
         erroEmail.textContent = "⚠ Digite seu e-mail.";
         email.classList.add("input-erro");
+        campoComErro(email)
 
         return;
     }
@@ -73,6 +88,7 @@ formulario.addEventListener("submit", function(event) {
 
         erroEmail.textContent = "⚠ Digite um e-mail válido.";
         email.classList.add("input-erro");
+        campoComErro(email)
 
         return;
     }
@@ -84,6 +100,7 @@ formulario.addEventListener("submit", function(event) {
 
         erroSenha.textContent = "⚠ Digite uma senha.";
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
     }
@@ -94,6 +111,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha deve ter pelo menos 4 caracteres.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha);
 
         return;
     }
@@ -104,6 +122,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha precisa ter uma letra maiúscula.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
     }
@@ -114,6 +133,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha precisa ter uma letra minúscula.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
     }
@@ -124,6 +144,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha precisa ter um número.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
     }
@@ -134,6 +155,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ A senha precisa ter um caractere especial.";
 
         senha.classList.add("input-erro");
+        campoComErro(senha)
 
         return;
     }
@@ -146,6 +168,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ Confirme sua senha.";
 
         confirmarSenha.classList.add("input-erro");
+        campoComErro(confirmarSenha)
 
         return;
     }
@@ -156,6 +179,7 @@ formulario.addEventListener("submit", function(event) {
             "⚠ As senhas não são iguais.";
 
         confirmarSenha.classList.add("input-erro");
+        campoComErro(confirmarSenha)
 
         return;
     }
@@ -166,6 +190,7 @@ formulario.addEventListener("submit", function(event) {
 
         erroTermos.textContent =
             "⚠ Você precisa aceitar os termos e condições.";
+            campoComErro(termos)
 
         return;
     }
@@ -426,28 +451,43 @@ senha.addEventListener("input", function() {
     if (pontos <= 1) {
 
         progressoForca.style.width = "20%";
+        progressoForca.style.background = "#ef4444";
+
         textoForca.textContent = "Muito Fraca";
+        textoForca.style.color = "#ef4444";
     }
 
     else if (pontos === 2) {
 
         progressoForca.style.width = "40%";
+        progressoForca.style.background ="#f97316"
+
         textoForca.textContent = "Fraca";
+        textoForca.style.color = "#f97316";
     } 
 
     else if (pontos === 3 ) {
 
         progressoForca.style.width = "60%";
+        progressoForca.style.background = "#eab308";
+
         textoForca.textContent = "Média"
+        textoForca.style.color = "#eab308";
     }
     else if (pontos === 4 ) {
 
         progressoForca.style.width = "80%"
+        progressoForca.style.background = "#3d82f6";
+
         textoForca.textContent = "Boa"
+        textoForca.style.color = "#3d82f6";
     }
     else {
         progressoForca.style.width = "100%";
+        progressoForca.style.background = "#22c55e"
+
         textoForca.textContent = "Forte"
+        textoForca.style.color = "#22c55e"
     }
 });
 
@@ -511,3 +551,69 @@ modalPrivacidade.addEventListener("click", function(event) {
     }
 
 });
+
+// avançar campos 
+
+nome.addEventListener("keydown", function(event) {
+
+    if (event.key === "Enter") {
+        event.preventDefault();
+        emailCadastro.focus();
+    }
+});
+
+emailCadastro.addEventListener("keydown", function(event) {
+
+    if(event.key === "Enter") {
+        event.preventDefault();
+        senhaCadastro.focus();
+    }
+});
+
+senhaCadastro.addEventListener("keydown", function(event) {
+
+    if(event.key === "Enter") {
+        event.preventDefault();
+        confirmarSenha.focus();
+    }
+});
+
+confirmarSenha.addEventListener("keydown", function(event) {
+
+    if(event.key === "Enter") {
+        event.preventDefault();
+        termos.checked = true;
+        formulario.requestSubmit()
+    }
+});
+
+
+// Icone do Nome 
+
+nome.addEventListener("input", function() {
+
+    const nomeDigitado = nome.value.trim();
+
+    iconeNome.classList.remove("animar");
+
+    void iconeNome.offsetWidth;
+    iconeNome.classList.add("animar");
+
+    if (nomeDigitado === ""){
+
+        iconeNome.classList.remove("fa-users");
+        iconeNome.classList.add("fa-user");
+
+        return;
+    }
+
+    if (nomeDigitado.includes(" ")) {
+
+        iconeNome.classList.remove("fa-user");
+        iconeNome.classList.add("fa-users");
+    } else {
+
+        iconeNome.classList.remove("fa-users");
+        iconeNome.classList.add("fa-user");
+    }
+}) ;

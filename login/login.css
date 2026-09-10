@@ -85,10 +85,53 @@ body {
     transition: 0.3s;
 }
 
+/* ANIMAÇÃO DOS CAMPOS */
+
+.input-mail,
+.input-password {
+    transition: transform 0.25s ease;
+}
+
+
+/* Quando clicar no campo */
+
+.input-mail:focus-within,
+.input-password:focus-within {
+    transform: translateY(-2px);
+}
+
+
+/* Campo selecionado */
+
 .input-mail input:focus,
 .input-password input:focus {
-    border-color:#1456d9;
-    box-shadow: 0 0 3px rgba(20, 86, 217, 0.12);
+    border-color: #1456d9;
+
+    box-shadow:
+        0 0 0 3px rgba(20, 86, 217, 0.08),
+        0 5px 15px rgba(20, 86, 217, 0.08);
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
+}
+
+
+/* Animação dos ícones */
+
+.input-mail i,
+.input-password i {
+    transition: color 0.25s ease, transform 0.25s ease;
+}
+
+
+/* Ícone quando o campo estiver selecionado */
+
+.input-mail:focus-within i,
+.input-password:focus-within i {
+    color: #1456d9;
+
+    transform: translateY(-50%) scale(1.08);
 }
 
 .input-mail input::placeholder,
@@ -165,11 +208,6 @@ body {
     min-height: 16px;
 }
 
-.input-erro {
-    border: 1px solid #d93025 !important;
-    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1); 
-}
-
 .texto-recuperacao {
     color: #777;
     font-size: 14px;
@@ -190,8 +228,13 @@ body {
 
 .input-erro {
     border: 1px solid #d93025 !important;
-    box-shadow: 0 0 0 3px rgba(217, 48, 37, 0.1);
 
+    box-shadow:
+        0 0 0 3px rgba(217, 48, 37, 0.10);
+
+    transition:
+        border-color 0.25s ease,
+        box-shadow 0.25s ease;
 }
 
 .recuperar {
@@ -542,6 +585,7 @@ body {
 
 #textoForca {
     font-weight: bold;
+    transition: 0.3s ease;
 }
 
 .barra-forca {
@@ -556,7 +600,7 @@ body {
     width: 0%;
     height: 100%;
     border-radius: 10px;
-    transition: 0.4s ease;
+    transition: width 0.4s ease, background 0.4s ease;
 }
 
 /* TERMOS E CONDICÕES*/
@@ -711,4 +755,148 @@ body {
         opacity: 1;
         transform: scale(1);
     }
+}
+
+/* animação ao abrir a pagina */
+
+.container {
+    animation: aparecerContainer 0.7s ease-out;
+}
+
+@keyframes aparecerContainer {
+    from {
+        opacity: 0;
+        transform:  translateY(30px) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.welcome {
+    animation: aparecerWelcome 0.8s ease-out;
+}
+
+@keyframes aparecerWelcome {
+    from {
+        opacity: 0;
+        transform: translateX(-30);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.container form {
+    animation: aparecerForm 0.8s ease-out;
+}
+
+@keyframes aparecerForm {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.container h1 {
+    animation: aparecerConteudo 0.8s ease-out 0.2s both;
+}
+
+.input-mail {
+    animation: aparecerConteudo 0.8s ease-out 0.3s both;
+}
+
+.input-password {
+    animation: aparecerConteudo 0.8s ease-out 0.4s both;
+}
+
+.remember-password {
+    animation: aparecerConteudo 0.8s ease-out 0.5s both;
+}
+
+.button-login {
+    animation: aparecerConteudo 0.8s ease-out 0.6s both;
+}
+
+.register {
+    animation: aparecerConteudo 0.8s ease-out 0.7s both;
+}
+
+@keyframes aparecerConteudo {
+
+    from {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+}
+
+#iconeNome {
+    transition: 0.3s ease;
+}
+
+#iconeNome.animar {
+    transform: translateY(-50%) scale(1.2);
+}
+
+/*Saudação personalizada*/
+
+.saudacao-login h1 {
+    margin-bottom: 8px;
+}
+
+.saudacao-login p {
+    color: #777;
+    font-size: 14px;
+    margin-bottom: 25px;
+    font-weight: 500;
+}
+
+/* ANIMAÇÃO DE ERRO DOS CAMPOS */
+
+.campo-treme {
+    animation: tremer 0.35s ease;
+}
+
+@keyframes tremer {
+
+    0% {
+        transform: translateX(0);
+    }
+
+    20% {
+        transform: translateX(-6px);
+    }
+
+    40% {
+        transform: translateX(6px);
+    }
+
+    60% {
+        transform: translateX(-5px);
+    }
+
+    80% {
+        transform: translateX(5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+
+}
+
+#termos.campo-treme {
+    animation: tremer 0.35s ease;
 }
