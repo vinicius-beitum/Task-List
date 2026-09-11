@@ -14,17 +14,19 @@ body {
 }
  .container {
     width: 900px;
-    height: 700px;
+    height: 620px;
     display: flex;
     background: white;
     border-radius: 25px;
     overflow: hidden;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    position: relative;
+    z-index: 1;
 }
 
 .welcome {
     width: 45%;
-    padding: 60px;
+    padding: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -33,7 +35,9 @@ body {
 }
 
 .welcome h2{
-    font-size: 32px;
+    font-size: 30px;
+    line-height: 1.2;
+    margin-bottom: 10px;
 }
 
 .welcome p {
@@ -43,33 +47,33 @@ body {
 }
 
 .welcome i {
-    margin-top: 50px;
-    font-size: 70px;
+    margin-top: 35px;
+    font-size: 65px;
     color: white;
     display: flex;
     justify-content: center;
 }
 
 .container form {
-    width: 60%;
-    padding: 35px 60px; 
+    width: 55%;
+    padding: 40px 55px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
 
 .container h1 {
-    font-size: 32px;
+    font-size: 30px;
     color: #102452;
-    margin-bottom: 25px;
+    margin-bottom: 28px;
 }
 
 .input-mail,
 .input-password  {
     width: 100%;
-    height: 50px;
+    height: 52px;
     position: relative;
-    margin-bottom: 12px;
+    margin-bottom: 15px;
 }
 
 .input-mail input,
@@ -78,9 +82,9 @@ body {
     height: 100%;
     padding: 0 55px ;
     border: 1px solid #cbd5e1;
-    border-radius: 10px;
+    border-radius: 11px;
     outline: none;
-    font-size: 15px;
+    font-size: 16px;
     color: #333;
     transition: 0.3s;
 }
@@ -153,8 +157,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 5px 0 25px;
-    font-size: 13px;
+    margin: 10px 0 25px;
+    font-size: 14px;
 }
 
 .remenber-password lebel {
@@ -184,9 +188,10 @@ body {
     width: 100%;
     height: 52px;
     border: none;
-    border-radius:10px ;
+    border-radius:11px ;
     background: linear-gradient(135deg, #123b8f, #1456d9);
     color: white;
+    font-size: 15px;
     font-weight: bold;
     cursor: pointer;
     transition: 0.3s;
@@ -268,14 +273,15 @@ body {
 .requisitos-senha p.valido i {
     color: #22c55e;
 }
+
 .register {
     text-align: center;
-    margin-top: 18px;
+    margin-top: 20px;
 }
 .register p {
     color: #777;
     font-size: 14px;
-    margin-bottom: 5px;
+    
 }
 .register a {
     color: #1456d9;
@@ -829,17 +835,14 @@ body {
 }
 
 @keyframes aparecerConteudo {
-
     from {
         opacity: 0;
         transform: translateY(15px);
     }
-
     to {
         opacity: 1;
         transform: translateY(0);
     }
-
 }
 
 #iconeNome {
@@ -870,33 +873,175 @@ body {
 }
 
 @keyframes tremer {
-
     0% {
         transform: translateX(0);
     }
-
     20% {
         transform: translateX(-6px);
     }
-
     40% {
         transform: translateX(6px);
     }
-
     60% {
         transform: translateX(-5px);
     }
-
     80% {
         transform: translateX(5px);
     }
-
     100% {
         transform: translateX(0);
     }
-
 }
 
 #termos.campo-treme {
     animation: tremer 0.35s ease;
+}
+
+/* Fundo animado */
+
+body {
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(135deg, #071b49, #0d3b8f);
+}
+
+
+body::before {
+    content: "";
+
+    position: fixed;
+
+    top: 0;
+    left: 0;
+
+    width: 25px;
+    height: 25px;
+
+    border-radius: 50%;
+
+    background: rgba(255, 255, 255, 0.08);
+
+    box-shadow:
+        150px 100px 0 rgba(255, 255, 255, 0.05),
+        350px 180px 0 rgba(255, 255, 255, 0.04),
+        600px 80px 0 rgba(255, 255, 255, 0.05),
+        850px 200px 0 rgba(255, 255, 255, 0.04),
+        1100px 100px 0 rgba(255, 255, 255, 0.05),
+        250px 500px 0 rgba(255, 255, 255, 0.04),
+        700px 550px 0 rgba(255, 255, 255, 0.05),
+        1150px 500px 0 rgba(255, 255, 255, 0.04);
+
+    z-index: 0;
+
+    animation: flutuar 14s ease-in-out infinite alternate;
+}
+
+body::after {
+    content: "";
+    position: fixed;
+    right: -100px;
+    bottom: -100px;
+    width: 280px;
+    height: 280px;
+    border-radius: 50%;
+    background:  rgba(255, 255, 255, 0.07);
+    z-index: 0;
+    animation: moverBola2 8s ease-in-out infinite alternate;
+}
+
+
+@keyframes moverBola2 {
+    0% {
+        transform: translate(0, 0) scale(1);
+    }
+    50% {
+        transform: translate(-100px, -80px) scale(1.12);
+    }
+    100% {
+        transform: translate(-50px, -150px) scale(0.95);
+    }
+
+}
+
+.container {
+    position: relative;
+    z-index: 1;
+}
+
+/*AVISO de caps lock*/
+.caps-lock {
+    display: none;
+    align-items: center;
+    gap: 6px;
+    margin-top: -8px;
+    margin-bottom: 10px;
+    color: #f59e0b;
+    font-size: 13px;
+    font-weight: 500;
+    animation: aparecerCaps 0.2s ease;
+}
+
+.caps-lock.mostrar {
+    display: flex;
+}
+
+.caps-lock i {
+    font-size: 13px;
+}
+
+@keyframes aparecerCaps {
+   from{
+        opacity:0 ;
+        transform: translateY(-4px);
+   }to{
+    opacity: 1;
+    transform: translateY(0);
+   }
+}
+
+/* BOTÃO X PARA LIMPAR O E-MAIL */
+
+.limpar-email {
+    position: absolute;
+    right: 50px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: #777;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+/* Quando o botão estiver visível */
+
+.limpar-email.mostrar {
+    display: flex;
+}
+
+.limpar-email i {
+    font-size: 15px;
+}
+
+.limpar-email:hover {
+    background: #e8f0ff;
+    color: #1456d9;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/* Ícone do usuário */
+
+.input-mail .icone-email {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #526789;
+    font-size: 18px;
 }

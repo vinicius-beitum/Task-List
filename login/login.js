@@ -1,11 +1,13 @@
 const formulario = document.getElementById("loginForm");
 
 const email = document.getElementById("email");
+const limparEmail = document.getElementById("limparEmail");
 const saudacaoLogin = document.getElementById("saudacaoLogin");
 const emailSalvoLogin = document.getElementById("emailSalvoLogin");
 const senha = document.getElementById("senha");
 const lembrar = document.getElementById("lembrar");
 const verSenha = document.getElementById("verSenha");
+const capsLock = document.getElementById("capsLock");
 
 const erroEmail = document.getElementById("erroEmail");
 const erroSenha = document.getElementById("erroSenha");
@@ -266,4 +268,50 @@ senha.addEventListener("keydown", function(event) {
         event.preventDefault();
         formulario.requestSubmit()
     }
+});
+
+senha.addEventListener("keyup", function(event) {
+
+    if (event.getModifierState("CapsLock")) {
+
+        capsLock.classList.add("mostrar");
+
+    } else {
+
+        capsLock.classList.remove("mostrar");
+
+    }
+
+});
+
+// MOSTRAR / ESCONDER BOTÃO DE LIMPAR E-MAIL
+
+email.addEventListener("input", function() {
+
+    if (email.value.length > 0) {
+
+        limparEmail.classList.add("mostrar");
+
+    } else {
+
+        limparEmail.classList.remove("mostrar");
+
+    }
+
+});
+
+// LIMPAR E-MAIL
+
+limparEmail.addEventListener("click", function() {
+
+    email.value = "";
+
+    limparEmail.classList.remove("mostrar");
+
+    erroEmail.textContent = "";
+
+    email.classList.remove("input-erro");
+
+    email.focus();
+
 });
