@@ -1,6 +1,8 @@
 const formulario = document.getElementById("loginForm");
 
 const email = document.getElementById("email");
+const iconeEmail = document.getElementById("iconeEmail");
+const trocarConta = document.getElementById("trocarConta");
 const limparEmail = document.getElementById("limparEmail");
 const saudacaoLogin = document.getElementById("saudacaoLogin");
 const emailSalvoLogin = document.getElementById("emailSalvoLogin");
@@ -35,8 +37,13 @@ window.addEventListener("load", function() {
         lembrar.checked = true;
 
         saudacaoLogin.querySelector("h1").textContent = "Olá Novamente! 💪"
+        emailSalvo.textContent = emailSalvo
         
-
+        trocarConta.classList.add("mostrar");
+    } else {
+        saudacaoLogin.querySelector("h1").textContent = "Entrar na sua conta ";
+        emailSalvoLogin.textContent = "";
+        trocarConta.style.display = "none";
     }
 });
 
@@ -237,10 +244,26 @@ verSenha.addEventListener("click", function() {
 
 email.addEventListener("input", function() {
 
+    const valor = email.value.trim();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     erroEmail.textContent = "";
 
     email.classList.remove("input-erro");
 
+    iconeEmail.classList.remove("email-valido");
+    iconeEmail.classList.remove("email-invalido");
+
+    if(valor === "") {
+        return;
+    }
+
+    if(emailRegex.test(valor)) {
+
+        iconeEmail.classList.add("email-valido");
+    } else {
+        iconeEmail.classList.add("email-invalido")
+    }
 });
 
 // LIMPAR ERRO DA SENHA
@@ -284,7 +307,7 @@ senha.addEventListener("keyup", function(event) {
 
 });
 
-// MOSTRAR / ESCONDER BOTÃO DE LIMPAR E-MAIL
+// MOSTRAR / ESCONDER BOTÃO DE LIMPAR E-MAIL X
 
 email.addEventListener("input", function() {
 
@@ -295,7 +318,7 @@ email.addEventListener("input", function() {
     } else {
 
         limparEmail.classList.remove("mostrar");
-
+        trocarConta.classList.remove("mostrar");
     }
 
 });
@@ -314,4 +337,22 @@ limparEmail.addEventListener("click", function() {
 
     email.focus();
 
+});
+
+trocarConta.addEventListener("click", function() {
+
+    localStorage.removeItem("email");
+
+    email.value = "";
+
+    lembrar.checked = false;
+
+    saudacaoLogin.querySelector("h1").textContent = 
+    "Entrar na sua Conta";
+
+    emailSalvoLogin.textContent = "";
+
+    trocarConta.style.display = "none";
+
+    email.focus();
 });

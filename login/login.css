@@ -1045,3 +1045,171 @@ body::after {
     color: #526789;
     font-size: 18px;
 }
+/* icone email validação*/
+
+#iconeEmail {
+    transition: 0.3s ease;
+}
+
+#iconeEmail.email-valido {
+    color: #22c55e;
+    transform: translateY(-50%) scale(1.15);
+}
+
+#iconeEmail.email-invalido {
+    color: #ef4444;
+    transform: translateY(-50%) scale(1.1);
+}
+
+/*Trocar conta*/
+
+.trocar-conta {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: -5px;
+    margin-bottom: 10px;
+    color: #1456d9;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.trocar-conta.mostrar {
+    display: flex;
+}
+
+.trocar-conta i {
+    font-size: 12px;
+    transition: 0.3s;
+}
+
+.trocar-conta:hover {
+    color: #0d3b8f;
+}
+
+.trocar-conta:hover i {
+    transform: rotate(180deg);
+}
+
+/* LOGIN SOCIAL */
+
+.login-social {
+    width: 100%;
+    margin-top: 18px;
+}
+
+.social-divisor {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.social-divisor span {
+    flex: 1;
+    height: 1px;
+    background: #d9dee8;
+}
+
+.social-divisor p {
+    margin: 0;
+    color: #888;
+    font-size: 14px;
+}
+
+.social-botoes {
+    width: 100%;
+    display: flex;
+    gap: 12px;
+}
+
+.botao-social {
+    flex: 1;
+    height: 45px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    border: 1px solid #d5dbe5;
+    border-radius: 10px;
+    background: white;
+    color: #333;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.botao-social i {
+    font-size: 18px;
+}
+
+.botao-social.google i {
+    color: #4285f4;
+}
+
+.botao-social.apple i {
+    color: #111;
+}
+
+.botao-social:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.10);
+    border-color: #b8c2d1;
+}
+
+@media (max-width: 500px) {
+
+    .social-botoes {
+        flex-direction: column;
+    }
+
+}
+
+.botao-social {
+    position: relative;
+    overflow: hidden;
+    transition: 
+        transform 0.3s ease,
+        box-shadow 0.3s ease,
+        border-color 0.3s ease,
+        background 0.3s ease;
+}
+
+.botao-social.google:hover {
+    background: #f8fbff;
+    border-color: #4285f4;
+    box-shadow: 0 6px 18px rgba(66, 133, 244, 0.20);
+    transform: translateY(-2px);
+}
+
+.botao-social.google:hover i {
+    transform: scale(1.15);
+}
+
+.botao-social.google i {
+    color: #4285f4;
+    transition: 0.3s ease;
+}
+
+.botao-social.apple:hover {
+    background: #111827;
+    border-color: #111827;
+    color: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.25);
+    transform: translateY(-2px);
+}
+
+.botao-social.apple:hover i {
+    color: white;
+    transform: scale(1.15);
+}
+
+.botao-social.apple i {
+    color: #111;
+    transition: 0.3s ease;
+}
