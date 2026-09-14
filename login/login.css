@@ -5,14 +5,16 @@
 }
 
 body {
-   min-height: 100vh;
-   font-family: Arial, Helvetica, sans-serif;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-    background: linear-gradient(135deg, #071b49, #0d3b8f);
+    min-height: 100vh;
+    font-family: Arial, Helvetica, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at 50% 50%, #0b2b63, #020817 75%);
+    color: black;
 }
- .container {
+
+.container {
     width: 900px;
     height: 620px;
     display: flex;
@@ -25,33 +27,87 @@ body {
 }
 
 .welcome {
-    width: 45%;
-    padding: 50px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background: linear-gradient(135deg, #071b49, #123b8f);
-    color: white;
+   width: 45%;
+   min-height: 100%;
+   position: relative;
+   overflow: hidden;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   padding: 50px;
+   background: radial-gradient(circle at 20% 20%, rgba(20, 110, 255, 0.35),
+   transparent 35%), linear-gradient(145deg, #061536, #0b2f78, #124dc1);
+   color: white;
 }
 
-.welcome h2{
-    font-size: 30px;
-    line-height: 1.2;
-    margin-bottom: 10px;
+.welcome-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 450px;
+    text-align: center;
 }
+
+/* ================================= */
+/* TÍTULO */
+/* ================================= */
+
+.welcome h2{
+    font-size: 36px;
+    line-height: 1.15;
+    margin-bottom: 28px;
+    color: #ffffff;
+}
+
+.welcome h2 span {
+    color: #20a4ff;
+}
+
+
+/* ================================= */
+/* TEXTO */
+/* ================================= */
 
 .welcome p {
     font-size: 16x;
     line-height: 1.6;
-    max-width: 320px;
+    max-width: 350px;
+    margin-bottom: 30px;
 }
 
-.welcome i {
-    margin-top: 35px;
-    font-size: 65px;
-    color: white;
+/* ================================= */
+/* BENEFÍCIOS */
+/* ================================= */
+
+.beneficios {
     display: flex;
     justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.beneficio {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.beneficio i {
+    width: 22px;
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: #1597ff;
+    color: white;
+    font-size: 11px;
+    box-shadow: 0 0 15px rgba(21, 151, 255, 0.5);
 }
 
 .container form {
@@ -315,6 +371,15 @@ body {
     .container h1 {
         font-size: 27px;
         margin-bottom: 25px;
+    }
+    .logo-tasklist {
+        width: 150px;
+    }
+    .beneficios {
+        gap: 10px;
+    }
+    .beneficios span {
+        font-size: 12px;
     }
 }
 
@@ -1212,4 +1277,50 @@ body::after {
 .botao-social.apple i {
     color: #111;
     transition: 0.3s ease;
+}
+
+/* ================================= */
+/* FORMAS DECORATIVAS */
+/* ================================= */
+
+.forma {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(30, 130, 255, 0.12);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.forma-1 {
+    width: 180px;
+    height: 180px;
+    top: -80px;
+    left: -80px;
+    border: 1px solid rgba(60, 160, 255, 0.35);
+}
+
+.forma-2 {
+    width: 240px;
+    height: 240px;
+    right: -130px;
+    bottom: -100px;
+    border: 1px solid rgba(60, 160, 255, 0.25);
+}
+
+.forma-3 {
+    width: 45px;
+    height: 45px;
+    left: 35px;
+    bottom: 100px;
+    background: rgba(30, 130, 255, 0.15);
+    animation: flutuarForma 5s ease-in-out infinite;
+}
+
+@keyframes flutuarForma {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-15px);
+    }
 }
