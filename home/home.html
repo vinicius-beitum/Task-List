@@ -1,204 +1,43 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>Task Manager</title>
-
+    <title>Meu Gerenciador</title>
     <link rel="stylesheet" href="home.css">
-    <link rel="sylesheet" href="home.js">
 </head>
-
 <body>
-
     <div class="app">
-
-        <!-- MENU LATERAL -->
-
-        <aside class="sidebar">
-
-            <div class="logo">
-                <div class="logo-icon">✓</div>
-
-                <h2>TaskFlow</h2>
-            </div>
-
-
+        <aside class="sidebar" aria-label="Navegação principal">
+            <div class="profile"><div class="avatar">M</div><div><strong>Marcos</strong><small>Conta Pessoal</small></div></div>
+            <div class="brand"><span class="logo-icon">✓</span><span>Meu Gerenciador</span></div>
             <nav>
-
-                <a href="#" class="active">
-                    <span>▣</span>
-                    Visão geral
-                </a>
-
-                <a href="#">
-                    <span>☐</span>
-                    Minhas tarefas
-                </a>
-
-                <a href="#">
-                    <span>✓</span>
-                    Concluídas
-                </a>
-
+                <button class="nav-link active" type="button" data-view="today"><span>▦</span> Meu Dia</button>
+                <button class="nav-link" type="button" data-view="inbox"><span>▤</span> Caixa de Entrada <b id="navPending">0</b></button>
+                <button class="nav-link" type="button" data-view="week"><span>□</span> Próximos 7 Dias</button>
+                <button class="nav-link" type="button" data-view="completed"><span>✓</span> Concluídos</button>
             </nav>
-
-
-            <div class="sidebar-bottom">
-
-                <p>Organize seu dia.</p>
-
-            </div>
-
+            <p class="sidebar-status"><span class="status-dot"></span> Sincronizado localmente</p>
         </aside>
-
-
-        <!-- CONTEÚDO PRINCIPAL -->
-
         <main class="content">
-
-            <header class="top">
-
-                <div>
-                    <h1>Olá! 👋</h1>
-
-                    <p>
-                        Aqui está o resumo das suas tarefas.
-                    </p>
-                </div>
-
-                <button class="new-task">
-                    + Nova tarefa
-                </button>
-
+            <header class="page-header">
+                <div><span class="eyebrow" id="currentDate"></span><h1>Minhas Tarefas</h1><p>Tudo o que importa, em um só lugar.</p></div>
+                <div class="pending-counter"><strong id="pendingTasks">0</strong><span>pendentes</span></div>
             </header>
-
-
-            <!-- CARDS DE RESUMO -->
-
-            <section class="stats">
-
-                <div class="stat-card">
-
-                    <div class="stat-icon blue">
-                        ☰
-                    </div>
-
-                    <div>
-                        <span>Total</span>
-                        <strong id="totalTasks">0</strong>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon green">
-                        ✓
-                    </div>
-
-                    <div>
-                        <span>Concluídas</span>
-                        <strong id="completedTasks">0</strong>
-                    </div>
-
-                </div>
-
-
-                <div class="stat-card">
-
-                    <div class="stat-icon orange">
-                        !
-                    </div>
-
-                    <div>
-                        <span>Pendentes</span>
-                        <strong id="pendingTasks">0</strong>
-                    </div>
-
-                </div>
-
+            <section class="alert-box" id="alertBox" hidden>
+                <div class="alert-icon">!</div><div><strong>Atenção com seus prazos</strong><p id="alertMessage"></p></div>
+                <button class="close-alert" id="closeAlert" type="button" aria-label="Fechar alerta">×</button>
             </section>
-
-
-            <!-- ÁREA PRINCIPAL -->
-
-            <section class="tasks-container">
-
-                <div class="tasks-title">
-
-                    <div>
-                        <h2>Minhas tarefas</h2>
-
-                        <p>
-                            Gerencie suas atividades.
-                        </p>
-                    </div>
-
-
-                    <select id="filter">
-
-                        <option value="all">
-                            Todas
-                        </option>
-
-                        <option value="pending">
-                            Pendentes
-                        </option>
-
-                        <option value="completed">
-                            Concluídas
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <!-- FORMULÁRIO -->
-
-                <div class="task-form">
-
-                    <input
-                        type="text"
-                        id="taskInput"
-                        placeholder="Digite uma nova tarefa..."
-                    >
-
-                    <input
-                        type="date"
-                        id="taskDate"
-                    >
-
-                    <button id="addTask">
-                        Adicionar
-                    </button>
-
-                </div>
-
-
-                <!-- LISTA -->
-
-                <div id="taskList">
-
-                    <div class="empty">
-                        Nenhuma tarefa por enquanto.
-                    </div>
-
-                </div>
-
+            <section class="tasks-container" aria-labelledby="sectionTitle">
+                <header class="tasks-header"><div><h2 id="sectionTitle">Hoje</h2><p>Suas tarefas ativas</p></div><span class="task-count" id="totalTasks">0 tarefas</span></header>
+                <div id="taskList" class="task-list" aria-live="polite"><p class="empty">Nenhuma tarefa nesta visualização.</p></div>
+                <form class="task-form" id="taskForm">
+                    <input id="taskInput" type="text" placeholder="Adicionar uma nova tarefa..." autocomplete="off" required>
+                    <div class="form-actions"><label class="date-control"><span>◷</span><span id="dateLabel">Definir data e hora</span><input id="taskDate" type="datetime-local" aria-label="Data e hora de vencimento"></label><button id="addTask" type="submit">Adicionar</button></div>
+                </form>
             </section>
-
         </main>
-
     </div>
-
-
     <script src="home.js"></script>
-
 </body>
-
 </html>
