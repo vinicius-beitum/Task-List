@@ -3,41 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meu Gerenciador</title>
+    <title>Minhas Tarefas</title>
     <link rel="stylesheet" href="home.css">
 </head>
 <body>
-    <div class="app">
-        <aside class="sidebar" aria-label="Navegação principal">
-            <div class="profile"><div class="avatar">M</div><div><strong>Marcos</strong><small>Conta Pessoal</small></div></div>
-            <div class="brand"><span class="logo-icon">✓</span><span>Meu Gerenciador</span></div>
-            <nav>
-                <button class="nav-link active" type="button" data-view="today"><span>▦</span> Meu Dia</button>
-                <button class="nav-link" type="button" data-view="inbox"><span>▤</span> Caixa de Entrada <b id="navPending">0</b></button>
-                <button class="nav-link" type="button" data-view="week"><span>□</span> Próximos 7 Dias</button>
-                <button class="nav-link" type="button" data-view="completed"><span>✓</span> Concluídos</button>
-            </nav>
-            <p class="sidebar-status"><span class="status-dot"></span> Sincronizado localmente</p>
-        </aside>
-        <main class="content">
-            <header class="page-header">
-                <div><span class="eyebrow" id="currentDate"></span><h1>Minhas Tarefas</h1><p>Tudo o que importa, em um só lugar.</p></div>
-                <div class="pending-counter"><strong id="pendingTasks">0</strong><span>pendentes</span></div>
-            </header>
-            <section class="alert-box" id="alertBox" hidden>
-                <div class="alert-icon">!</div><div><strong>Atenção com seus prazos</strong><p id="alertMessage"></p></div>
-                <button class="close-alert" id="closeAlert" type="button" aria-label="Fechar alerta">×</button>
-            </section>
-            <section class="tasks-container" aria-labelledby="sectionTitle">
-                <header class="tasks-header"><div><h2 id="sectionTitle">Hoje</h2><p>Suas tarefas ativas</p></div><span class="task-count" id="totalTasks">0 tarefas</span></header>
-                <div id="taskList" class="task-list" aria-live="polite"><p class="empty">Nenhuma tarefa nesta visualização.</p></div>
-                <form class="task-form" id="taskForm">
-                    <input id="taskInput" type="text" placeholder="Adicionar uma nova tarefa..." autocomplete="off" required>
-                    <div class="form-actions"><label class="date-control"><span>◷</span><span id="dateLabel">Definir data e hora</span><input id="taskDate" type="datetime-local" aria-label="Data e hora de vencimento"></label><button id="addTask" type="submit">Adicionar</button></div>
-                </form>
-            </section>
-        </main>
-    </div>
+    <main class="task-app">
+        <header class="page-header">
+            <div>
+                <p class="eyebrow">ORGANIZAÇÃO PESSOAL</p>
+                <h1>Minhas tarefas</h1>
+                <p class="subtitle">Adicione, acompanhe e conclua suas atividades.</p>
+            </div>
+            <div class="task-summary" aria-live="polite">
+                <strong id="totalTarefas">0</strong>
+                <span>tarefas</span>
+            </div>
+        </header>
+
+        <section class="task-panel" aria-labelledby="taskHeading">
+            <div class="panel-header">
+                <div>
+                    <h2 id="taskHeading">Lista de tarefas</h2>
+                    <p id="emptyHint">Suas novas tarefas aparecerão aqui.</p>
+                </div>
+            </div>
+
+            <div id="listaTarefas" class="task-list" aria-live="polite">
+                <p class="empty-state">Nenhuma tarefa adicionada ainda.</p>
+            </div>
+
+            <form id="formTarefa" class="task-form">
+                <label class="sr-only" for="nomeTarefa">Nome da tarefa</label>
+                <input id="nomeTarefa" type="text" placeholder="Digite o nome da tarefa..." autocomplete="off" required>
+
+                <div class="form-fields">
+                    <label class="field-label">
+                        <span>Data de vencimento</span>
+                        <input id="dataTarefa" type="date" required>
+                    </label>
+                    <label class="field-label">
+                        <span>Horário</span>
+                        <input id="horarioTarefa" type="time" required>
+                    </label>
+                    <button class="add-button" type="submit" aria-label="Adicionar tarefa">+</button>
+                </div>
+            </form>
+        </section>
+    </main>
     <script src="home.js"></script>
 </body>
 </html>

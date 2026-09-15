@@ -1,74 +1,108 @@
+:root {
+    --background: #03091e;
+    --background-soft: #050c24;
+    --panel: rgba(10, 25, 62, 0.88);
+    --panel-light: rgba(18, 42, 91, 0.72);
+    --border: rgba(37, 99, 235, 0.62);
+    --border-bright: #2563eb;
+    --neon: #00bfff;
+    --neon-light: #00d2ff;
+    --text: #ffffff;
+    --muted: #93c5fd;
+    --muted-dark: #647eac;
+}
+
+/* Reset e base */
 * {
+    box-sizing: border-box;
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
 }
 
 body {
-   min-height: 100vh;
-   font-family: Arial, Helvetica, sans-serif;
-   display: flex;
-   justify-content: center;
-   align-items: center;
-    background: linear-gradient(135deg, #071b49, #0d3b8f);
-}
- .container {
-    width: 900px;
-    height: 600px;
+    min-height: 100vh;
     display: flex;
-    background: white;
-    border-radius: 25px;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    overflow-x: hidden;
+    background:
+        radial-gradient(circle at 50% 0%, rgba(0, 123, 255, 0.28), transparent 38%),
+        radial-gradient(circle at 100% 100%, rgba(0, 210, 255, 0.12), transparent 32%),
+        var(--background);
+    color: var(--text);
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+/* Cartao de autenticacao */
+.container {
+    width: min(900px, 100%);
+    min-height: 600px;
+    display: flex;
     overflow: hidden;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    background: var(--panel);
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.52),
+        0 0 35px rgba(0, 123, 255, 0.12);
+    backdrop-filter: blur(18px);
 }
 
 .welcome {
     width: 45%;
-    padding: 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    background: linear-gradient(135deg, #071b49, #123b8f);
-    color: white;
+    padding: 60px;
+    background:
+        linear-gradient(145deg, rgba(0, 123, 255, 0.28), rgba(5, 12, 36, 0.78)),
+        var(--panel-light);
+    border-right: 1px solid var(--border);
 }
 
-.welcome h2{
+.welcome h2 {
     font-size: 32px;
+    line-height: 1.15;
 }
 
 .welcome p {
-    font-size: 16x;
-    line-height: 1.6;
     max-width: 320px;
+    margin-top: 18px;
+    color: var(--muted);
+    font-size: 16px;
+    line-height: 1.6;
 }
 
 .welcome i {
-    margin-top: 50px;
-    font-size: 70px;
-    color: white;
     display: flex;
     justify-content: center;
+    margin-top: 50px;
+    color: var(--neon-light);
+    font-size: 70px;
+    filter: drop-shadow(0 0 16px rgba(0, 210, 255, 0.6));
 }
 
+/* Formulario */
 .container form {
     width: 55%;
-    padding: 50px 60px; 
     display: flex;
     flex-direction: column;
     justify-content: center;
+    padding: 50px 60px;
 }
 
 .container h1 {
-    font-size: 32px;
-    color: #102452;
     margin-bottom: 40px;
+    color: var(--text);
+    font-size: 32px;
 }
 
 .input-mail,
 .input-password {
+    position: relative;
     width: 100%;
     height: 55px;
-    position: relative;
     margin-bottom: 20px;
 }
 
@@ -76,104 +110,139 @@ body {
 .input-password input {
     width: 100%;
     height: 100%;
-    padding: 0 50px 20px;
-    border: 1px solid #cbd5e1;
+    padding: 0 50px 0 18px;
+    border: 1px solid var(--border);
     border-radius: 10px;
     outline: none;
+    background: rgba(3, 9, 30, 0.82);
+    color: var(--text);
     font-size: 15px;
-    color: #333;
-    transition: 0.3s;
-}
-
-.input-mail input:focus,
-.input-password input:focus {
-    border-color:#1456d9;
-    box-shadow: 0 0 3px rgba(20, 86, 217, 0.12);
+    transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
 }
 
 .input-mail input::placeholder,
 .input-password input::placeholder {
-    color: #777;
+    color: var(--muted-dark);
+}
+
+.input-mail input:focus,
+.input-password input:focus {
+    border-color: var(--neon-light);
+    background: rgba(3, 9, 30, 0.96);
+    box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.12), 0 0 18px rgba(0, 123, 255, 0.18);
 }
 
 .input-mail i,
 .input-password i {
     position: absolute;
-    right: 20px;
     top: 50%;
+    right: 20px;
     transform: translateY(-50%);
-    color:#526789;
+    color: var(--muted);
     font-size: 18px;
+}
+
+.input-password i {
+    cursor: pointer;
 }
 
 .remember-password {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 12px;
     margin: 5px 0 25px;
+    color: var(--muted);
     font-size: 13px;
 }
 
-.remenber-password lebel {
+.remember-password label {
     display: flex;
     align-items: center;
     gap: 6px;
-    color: #555;
 }
 
-.remenber-password input [type="checkbox"] {
+.remember-password input[type="checkbox"] {
     width: 15px;
     height: 15px;
+    accent-color: var(--neon);
     cursor: pointer;
 }
 
-.remenber-password a {
-    color: #1456d9;
+.remember-password a,
+.register a {
+    color: var(--neon-light);
+    font-weight: 600;
     text-decoration: none;
-    font-weight: 500;
 }
 
-.remember-password a:hover {
+.remember-password a:hover,
+.register a:hover {
+    color: var(--text);
     text-decoration: underline;
 }
 
+/* Botao principal */
 .button-login button {
     width: 100%;
     height: 52px;
-    border: none;
-    border-radius:10px ;
-    background: linear-gradient(135deg, #123b8f, #1456d9);
-    color: white;
-    font-weight: bold;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--border-bright), var(--neon-light));
+    color: var(--text);
+    font-weight: 700;
     cursor: pointer;
-    transition: 0.3s;
+    box-shadow: 0 0 20px rgba(0, 191, 255, 0.25);
+    transition: transform 0.25s, box-shadow 0.25s, filter 0.25s;
 }
 
 .button-login button:hover {
-    transition:  translateY(-2px);
-    box-shadow: 0 8px 20px rgba(20, 86, 217, 0.3);
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 28px rgba(0, 191, 255, 0.38);
 }
 
-.register a {
-    color: #1456d9;
-    font-weight: bold;
-    text-decoration: none;
-}
-
-.register a:hover {
-    text-decoration:underline ;
+.register {
+    margin-top: 22px;
+    color: var(--muted);
+    font-size: 13px;
+    text-align: center;
 }
 
 @media (max-width: 700px) {
-    .container{
-        width: 90%;
-        min-height: auto;
+    body {
+        padding: 14px;
     }
+
+    .container {
+        min-height: auto;
+        flex-direction: column;
+    }
+
+    .welcome,
     .container form {
         width: 100%;
-        padding: 35px 25px;
     }
+
+    .welcome {
+        padding: 38px 28px;
+    }
+
+    .welcome h2 {
+        font-size: 27px;
+    }
+
+    .welcome i {
+        margin-top: 28px;
+        font-size: 48px;
+    }
+
+    .container form {
+        padding: 38px 28px;
+    }
+
     .container h1 {
+        margin-bottom: 28px;
         font-size: 27px;
     }
 }
