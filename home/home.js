@@ -1,243 +1,142 @@
-const taskInput = document.getElementById("taskInput");
-const taskDate = document.getElementById("taskDate");
+const formularioTarefa = document.querySelector("#formTarefa");
+const nomeTarefa = document.querySelector("#nomeTarefa");
+const dataTarefa = document.querySelector("#dataTarefa");
+const horarioTarefa = document.querySelector("#horarioTarefa");
+const listaTarefas = document.querySelector("#listaTarefas");
+const totalTarefas = document.querySelector("#totalTarefas");
+const armazenamento = "minhas-tarefas";
 
-const addTask = document.getElementById("addTask");
+let tarefas = [];
+tarefas = carregarTarefas();
 
-const taskList = document.getElementById("taskList");
+function carregarTarefas() {
+    try {
+        return JSON.parse(localStorage.getItem(armazenamento)) || [];
+    } catch (erro) {
+        return [];
+    }
+}
 
-const totalTasks = document.getElementById("totalTasks");
-const completedTasks = document.getElementById("completedTasks");
-const pendingTasks = document.getElementById("pendingTasks");
+function salvarTarefas() {
+    localStorage.setItem(armazenamento, JSON.stringify(tarefas));
+}
 
-const filter = document.getElementById("filter");
+function escaparHtml(texto) {
+    return String(texto).replace(/[&<>'"]/g, (caractere) => ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        "'": "&#39;",
+        '"': "&quot;"
+    }[caractere]));
+}
 
+function formatarDataHora(data, horario) {
+    if (!data || !horario) return "Sem data e horário definidos";
 
-/* ADICIONAR TAREFA */
+    const [ano, mes, dia] = data.split("-");
+    return `📅 ${dia}/${mes}/${ano} às ${horario}`;
+}
 
-addTask.addEventListener("click", function () {
+// Renderiza a lista inteira sempre que os dados mudam.
+function renderizarTarefas() {
+    totalTarefas.textContent = tarefas.length;
 
-    const name = taskInput.value.trim();
-
-    const date = taskDate.value;
-
-
-    if (name === "") {
-
-        alert("Digite uma tarefa!");
-
+    if (tarefas.length === 0) {
+        listaTarefas.innerHTML = '<p class="empty-state">Nenhuma tarefa adicionada ainda.</p>';
         return;
     }
 
+    listaTarefas.innerHTML = tarefas.map((tarefa) => `
+        <article class="task-item ${tarefa.concluida ? "concluida" : ""}" data-id="${tarefa.id}">
+            <input class="task-checkbox" type="checkbox" ${tarefa.concluida ? "checked" : ""} aria-label="Concluir ${escaparHtml(tarefa.nome)}">
+            <div class="task-content">
+                <p class="task-name">${escaparHtml(tarefa.nome)}</p>
+                <p class="task-datetime">${formatarDataHora(tarefa.data, tarefa.horario)}</p>
+            </div>
+            <div class="task-actions">
+                <button class="task-action editar" type="button" aria-label="Editar tarefa">✏️</button>
+                <button class="task-action remover" type="button" aria-label="Excluir tarefa">🗑️</button>
+            </div>
+        </article>
+    `).join("");
+}
 
-    const empty = document.querySelector(".empty");
+// Adiciona no final do array e, portanto, no final do contêiner.
+function adicionarTarefa(evento) {
+    evento.preventDefault();
 
-    if (empty) {
-        empty.remove();
+    const nome = nomeTarefa.value.trim();
+    if (!nome || !dataTarefa.value || !horarioTarefa.value) {
+        formularioTarefa.reportValidity();
+        return;
     }
 
-
-    const task = document.createElement("div");
-
-    task.classList.add("task");
-
-
-    task.innerHTML = `
-
-        <div class="task-left">
-
-            <input type="checkbox">
-
-            <div>
-
-                <div class="task-name">
-                    ${name}
-                </div>
-
-                <div class="task-date">
-                    ${formatDate(date)}
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <button class="delete">
-            Excluir
-        </button>
-
-    `;
-
-
-    /* CONCLUIR */
-
-    const checkbox =
-        task.querySelector("input");
-
-
-    checkbox.addEventListener("change", function () {
-
-        task.classList.toggle(
-            "completed",
-            checkbox.checked
-        );
-
-        updateStats();
-
+    tarefas.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        nome,
+        data: dataTarefa.value,
+        horario: horarioTarefa.value,
+        concluida: false
     });
 
+    salvarTarefas();
+    formularioTarefa.reset();
+    renderizarTarefas();
+    nomeTarefa.focus();
+}
 
-    /* EXCLUIR */
+// Alterna o estado concluído da tarefa selecionada.
+function alternarStatus(id, concluida) {
+    const tarefa = tarefas.find((item) => item.id === id);
+    if (!tarefa) return;
 
-    const deleteButton =
-        task.querySelector(".delete");
+    tarefa.concluida = concluida;
+    salvarTarefas();
+    renderizarTarefas();
+}
 
+// Edita o nome, a data e o horário usando os campos de edição.
+function editarTarefa(id) {
+    const tarefa = tarefas.find((item) => item.id === id);
+    if (!tarefa) return;
 
-    deleteButton.addEventListener("click", function () {
+    const novoNome = window.prompt("Nome da tarefa:", tarefa.nome);
+    if (novoNome === null || !novoNome.trim()) return;
 
-        task.remove();
+    const novaData = window.prompt("Data de vencimento (AAAA-MM-DD):", tarefa.data);
+    const novoHorario = window.prompt("Horário de vencimento (HH:MM):", tarefa.horario);
+    if (!novaData || !novoHorario) return;
 
-        updateStats();
+    tarefa.nome = novoNome.trim();
+    tarefa.data = novaData;
+    tarefa.horario = novoHorario;
+    salvarTarefas();
+    renderizarTarefas();
+}
 
-        checkEmpty();
+// Exclui a tarefa pelo ID e mantém as demais na mesma ordem.
+function removerTarefa(id) {
+    tarefas = tarefas.filter((tarefa) => tarefa.id !== id);
+    salvarTarefas();
+    renderizarTarefas();
+}
 
-    });
+formularioTarefa.addEventListener("submit", adicionarTarefa);
 
-
-    taskList.appendChild(task);
-
-
-    taskInput.value = "";
-
-    taskDate.value = "";
-
-
-    updateStats();
-
+listaTarefas.addEventListener("change", (evento) => {
+    if (!evento.target.classList.contains("task-checkbox")) return;
+    const id = evento.target.closest(".task-item").dataset.id;
+    alternarStatus(id, evento.target.checked);
 });
 
+listaTarefas.addEventListener("click", (evento) => {
+    const item = evento.target.closest(".task-item");
+    if (!item) return;
 
-/* FORMATAR DATA */
-
-function formatDate(date) {
-
-    if (!date) {
-
-        return "Sem data";
-    }
-
-
-    const parts = date.split("-");
-
-
-    return `${parts[2]}/${parts[1]}/${parts[0]}`;
-}
-
-
-/* ATUALIZAR ESTATÍSTICAS */
-
-function updateStats() {
-
-    const tasks =
-        taskList.querySelectorAll(".task");
-
-
-    let completed = 0;
-
-
-    tasks.forEach(function (task) {
-
-        const checkbox =
-            task.querySelector("input");
-
-
-        if (checkbox.checked) {
-
-            completed++;
-
-        }
-
-    });
-
-
-    const total = tasks.length;
-
-    const pending = total - completed;
-
-
-    totalTasks.textContent = total;
-
-    completedTasks.textContent = completed;
-
-    pendingTasks.textContent = pending;
-}
-
-
-/* VERIFICAR LISTA VAZIA */
-
-function checkEmpty() {
-
-    const tasks =
-        taskList.querySelectorAll(".task");
-
-
-    if (tasks.length === 0) {
-
-        taskList.innerHTML = `
-
-            <div class="empty">
-                Nenhuma tarefa por enquanto.
-            </div>
-
-        `;
-
-    }
-
-}
-
-
-/* FILTRO */
-
-filter.addEventListener("change", function () {
-
-    const value = filter.value;
-
-    const tasks =
-        taskList.querySelectorAll(".task");
-
-
-    tasks.forEach(function (task) {
-
-        const checkbox =
-            task.querySelector("input");
-
-
-        if (value === "all") {
-
-            task.style.display = "flex";
-
-        }
-
-
-        if (value === "completed") {
-
-            task.style.display =
-                checkbox.checked
-                    ? "flex"
-                    : "none";
-
-        }
-
-
-        if (value === "pending") {
-
-            task.style.display =
-                !checkbox.checked
-                    ? "flex"
-                    : "none";
-
-        }
-
-    });
-
+    const id = item.dataset.id;
+    if (evento.target.closest(".editar")) editarTarefa(id);
+    if (evento.target.closest(".remover")) removerTarefa(id);
 });
+
+renderizarTarefas();
