@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+     <link rel="stylesheet" href="login.css">
+
+    <title>Recuperar senha</title>
+</head>
+<body>
+
+    <main class="container recuperar">
+
+        <div class="welcome">
+
+            <h2>Recupere sua senha !</h2>
+
+            <p>
+                Não se preocupe. Digite seu e-mail e 
+                vamos ajudá-lo a recuperar o acesso á sua conta.
+            </p>
+
+            <i class="fa-solid fa-key"></i>
+
+        </div>
+    
+    <form id="recuperarForm">
+            <h1>Esqueci minha senha</h1>
+
+            <p class="texto-recuperado">
+                Digite seu e-mail cadastrado na sua conta.
+            </p>
+
+        <div class="input-mail">
+            <input type="email" id="emailRecuperacao" placeholder="Digite seu Email">
+            <i class="fa-solid fa-envelope"></i>
+        </div>
+
+        <span class="erro" id="erroEmailRecuperacao"></span>
+
+        <div class="button-login">
+            <button type="submit">Recuperar senha</button>
+        </div>
+
+        <div class="register">
+            <p>Ja lembrou sua senha?
+            <a href="login.html">Faça login</a></p>
+        </div>
+
+    </form>
+</main>
+
+    <script src="recuperar.js"></script>
+</body>
+</html>

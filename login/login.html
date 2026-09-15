@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+    <title>Login</title>
+</head>
+<body>
+    
+<main class="container">
+
+    <div class="welcome">
+
+        <div class="welcome-content">
+
+            <h2>
+                Bem-vindo <span>de volta!</span>
+            </h2>
+
+            <p>
+                Organize suas tarefas, aumente sua produtividade
+                e trabalhe melhor em equipe.
+            </p>
+        
+            <div class="beneficios">
+
+                <div class="beneficio">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Organização</span>
+                </div>
+
+                <div class="beneficio">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Produtividade</span>
+                </div>
+
+                <div class="beneficio">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Trabalho em equipe</span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="forma forma-1"></div>
+        <div class="forma forma-2"></div>
+        <div class="forma forma-3"></div>
+
+    </div>
+
+    <form id="loginForm" action="../home/home.html" method="get">
+
+        <div class="suadacao-login" id="saudacaoLogin">
+            <h1>Entrar na sua conta </h1>
+            <p id="emailSalvoLogin"></p>
+        </div>
+        
+
+        <div class="input-mail">
+
+            <input type="email"  id="email" placeholder="Digite seu Email">
+
+            <button type="button" id="limparEmail" class="limpar-email">
+            <i class="fa-solid fa-xmark"></i>
+            </button>
+            <i class="fa-solid fa-user icone-email" id="iconeEmail"></i>
+        </div>
+             
+        <div class="trocar-conta" id="trocarConta">
+            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+            <span>Trocar conta</span>
+        </div>
+
+        <span  class="error" id="erroEmail"></span>
+
+         <div class="input-password">             
+            <input type="password"  id="senha" placeholder="Digite uma senha">
+            <i class="fa-solid fa-eye" id="verSenha"></i>
+        </div>
+
+        <div class="caps-lock" id="capsLock">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            Caps Lock está ativado.
+        </div>
+
+        <span  class="error" id="erroSenha"></span>
+
+        <div class="remember-password">
+
+             <label for="lembrar">
+                <input type="checkbox" id="lembrar">
+                Lembrar minha senha
+            </label>
+
+        <a href="recuperar.html">Esqueci minha senha</a>
+         </div>
+
+        <div class="button-login">
+            <button type="submit">Login</button>
+        </div>
+
+        <div class="register">
+             <p>Não tenho uma conta <a href="cadastro.html">Cadastre-se</a></p>    
+        </div>
+
+        <!--Login social-->
+
+        <!-- LOGIN SOCIAL -->
+
+<div class="login-social">
+
+    <div class="social-divisor">
+        <span></span>
+        <p>ou</p>
+        <span></span>
+    </div>
+
+    <div class="social-botoes">
+
+        <button type="button" class="botao-social google">
+            <i class="fa-brands fa-google"></i>
+            <span>Google</span>
+        </button>
+
+        <button type="button" class="botao-social apple">
+            <i class="fa-brands fa-apple"></i>
+            <span>Apple</span>
+        </button>
+
+    </div>
+
+</div>
+
+</form>
+
+</main>
+
+<!-- TELA DE CARREGAMENTO -->
+<div class="login-loading" id="loginLoading">
+
+    <div class="loading-box">
+
+        <div class="spinner"></div>
+
+        <p>Entrando...</p>
+
+    </div>
+
+</div>
+
+
+<!-- TELA DE SUCESSO -->
+<div class="login-sucesso" id="loginSucesso">
+
+    <div class="sucesso-box">
+
+        <div class="check">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2>Login realizado com sucesso!</h2>
+
+        <p>Bem-vindo de volta.</p>
+
+    </div>
+
+</div>
+
+<script src="login.js"></script>
+</body>
+</html>

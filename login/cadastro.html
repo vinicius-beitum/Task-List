@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="login.css">
+    <title>Cadastro</title>
+</head>
+<body>
+
+ <main class="container cadastro">
+
+    <div class="welcome">
+
+        <h2>Bem-vindo!</h2>
+            <p>
+            Crie sua conta para acessar todos os recursos
+            e aproveitar ao máximo nossa plataforma.
+            </p>
+
+        <i class="fa-solid fa-user-plus"></i>
+    </div>
+
+    <form id="cadastroForm">
+        <h1>Crie sua conta </h1>
+
+    <div class="input-mail">
+        <input type="text" id="nome" placeholder="Digite seu Nome">
+        <i class="fa-solid fa-user" id="iconeNome"></i>
+    </div>
+
+    <span class="erro" id="erroNome"></span>
+
+    <div class="input-mail">
+        <input type="email" id="emailCadastro" placeholder="Digite seu Email">
+        <i class="fa-solid fa-envelope"></i>
+    </div>
+
+    <span class="erro" id="erroEmailCadastro"></span>
+
+    <div class="input-password">
+        <input type="password" id="senhaCadastro" placeholder="Digite uma senha">
+        <i class="fa-solid fa-eye" id="mostrarSenhaCadastro"></i>
+    </div>
+
+    <span class="erro" id="erroSenhaCadastro"></span>
+
+   <div class="requisitos-senha">
+
+    <p id="reqTamanho">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Pelo menos 4 caracteres
+    </p>
+
+    <p id="reqMaiuscula">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Uma letra maiúscula
+    </p>
+
+    <p id="reqMinuscula">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Uma letra minúscula
+    </p>
+
+    <p id="reqNumero">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Um número
+    </p>
+
+    <p id="reqEspecial">
+        <i class="fa-solid fa-circle-xmark"></i>
+        Um caractere especial
+    </p>
+
+    </div>
+
+    <div class="input-password">
+        <input type="password" id="confirmarSenha" placeholder="Confirme sua senha">
+        <i class="fa-solid fa-eye" id="mostrarConfirmarSenha"></i>
+    </div>
+
+    <div class="forca-senha" id="forcaSenha">
+
+    <!--força da senha -->
+
+        <div class="forca-topo">
+            <span>Força da Senha</span>
+            
+            <span id="textoForca">
+                Muito Fraca
+            </span>
+
+        </div>
+
+        <div class="barra-forca">
+
+            <div class="progresso-forca" id="progressoForca"></div>
+
+        </div>
+    </div>
+
+    <span class="erro" id="erroConfirmarSenha"></span>
+
+    <div class="remember-password">
+        <label>
+            <input type="checkbox" id="termos">
+           
+            <span>
+                Li e aceito os 
+                <a href="#" id="abrirTermos">Termos e Condições</a>
+                e a 
+                <a href="#" id="abrirPrivacidade">Políticas de Privacidade</a>
+            </span>
+
+        </label>
+    </div>
+
+    <span class="erro" id="erroTermos"></span>
+
+    <div class="button-login">
+        <button type="submit">Cria Conta</button>
+    </div>
+
+    <div class="register">
+        <p> Já possui uma conta ?</p>
+        <a href="login.html"> Entrar na Minha Conta </a>
+    </div>
+
+    </form>
+
+</main>
+
+    <!-- TELA DE CARREGAMENTO -->
+
+<div class="cadastro-loading" id="cadastroLoading">
+
+    <div class="loading-box">
+
+        <div class="spinner"></div>
+
+        <p>Criando sua conta...</p>
+
+    </div>
+
+</div>
+
+<div class="cadastro-sucesso" id="cadastroSucesso">
+
+    <div class="sucesso-box">
+
+        <div class="check">
+            <i class="fa-solid fa-check"></i>
+        </div>
+
+        <h2>Conta criada com sucesso!</h2>
+
+        <p>Você será direcionado para o login.</p>
+
+    </div>
+
+</div>
+
+<!--Modal termos e condições-->
+
+<div class="modal" id="modalTermos">
+
+    <div class="modal-box">
+
+        <button class="fechar-modal" id="fecharTermos">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-icon">
+            <i class="fa-solid fa-file-contract"></i> 
+        </div>
+
+        <h2>Termos e Condições</h2>
+
+        <p>
+            Ao criar uma conta, você cocncorda em utilizar nossa
+            plataforma de forma responsável e de acordo com as 
+            regras estabelecidas.
+        </p>
+
+        <h3>Uso da Plataforma</h3>
+
+        <p>
+            O usúario é responsável pelas informações fornecídas
+            durante o cadastro e pelo uso de sua conta.
+        </p>
+
+        <h3>Segurnaça</h3>
+
+        <p>
+            Recomendamos que você mantenha sua senha segura e 
+            não compartilhe seus dados de acesso com outras pessoas.
+        </p>
+
+        <button class="botao-fechar" id="botaoFecharTermos">
+            Entendi
+        </button>
+    </div>
+</div>
+
+<div class="modal" id="modalPrivacidade">
+
+    <div class="modal-box">
+
+        <button class="fechar-modal" id="fecharPrivacidade">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="modal-icon">
+        <i class="fa-solid fa-shield-halved"></i>
+        </div>
+
+        <h2>Política de Privacidade</h2>
+
+         <p>
+            Prezamos pela privacidade e segurança das informações
+            fornecidas pelos usúarios durante a utilização da plataforma.
+        </p>
+
+        <h3>Dados pessoais</h3>
+
+        <p>
+            As informações fornecidas no cadasto devem ser utilizadas
+            apenas para as finalidades relacionadas ao funcionamento
+            da plataforma.
+        </p>
+
+        <h3>Proteção</h3>
+
+        <p>
+            Recomendamos que o usúario mantenha seus dados de acesso 
+            protegidos e não compartilhe sua senha.
+        </p>
+
+        <button class="botao-fechar" id="botaoFecharPrivacidade">
+            Entendi
+        </button>
+    </div>
+</div>
+
+<script src="cadastro.js"></script>
+</body>
+</html>
