@@ -32,6 +32,21 @@
                     <input id="taskInput" type="text" placeholder="Adicionar uma nova tarefa..." autocomplete="off" required>
                     <div class="form-actions"><label class="date-control" for="taskDate"><span aria-hidden="true">◷</span><span id="dateLabel">Definir data e hora</span></label><input id="taskDate" type="datetime-local" aria-label="Data e hora de vencimento"><button type="submit">Adicionar</button></div>
                 </form>
+                <section class="secao-pastas">
+                    <div class="cabecalho-pastas">
+                        <div>
+                            <h2>Minhas Pastas</h2>
+                            <p>Organize suas tarefas por categoria.</p>
+                        </div>
+                        <button type="button" id="btnNovaPasta">
+                            <i class="fa-solid fa-plus"></i>
+                            Nova Pasta
+                        </button>
+                    </div>
+                    <div id="listasPastas" class="lista-pastas">
+                        <p>Carregando pastas...</p>
+                    </div>
+                </section>
             </section>
         </section>
     </main>
