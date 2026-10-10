@@ -28,3 +28,55 @@ taskList.addEventListener("click", (event) => { const element = event.target.clo
 document.querySelectorAll(".nav-link").forEach((button) => button.addEventListener("click", () => { currentView = button.dataset.view; document.querySelectorAll(".nav-link").forEach((item) => item.classList.toggle("active", item === button)); document.querySelector("#sectionTitle").textContent = { today: "Hoje", inbox: "Caixa de Entrada", week: "Próximos 7 dias", completed: "Concluídos" }[currentView]; renderTasks(); }));
 document.querySelector("#currentDate").textContent = new Intl.DateTimeFormat("pt-BR", { weekday: "long", day: "2-digit", month: "long" }).format(new Date()).toUpperCase();
 renderTasks();
+
+async function carregarPastas() {
+    const listasPastas = document.getElementById("listasPastas");
+
+    try {
+        const resposta = await fetch("../backend/pastas.php", {
+            credentials= "same-origin"
+        });
+
+        if(!resposta.ok) {
+            throw new Error("não foi possivel carregar as pastas.");
+        }
+        
+        const pastas = await resposta.json();
+        
+        listasPastas.replaceChildren();
+        
+        if (pastas.erro) {
+        throw new Error(pastas.erro);
+        }
+
+        if(pastas.length === 0) {
+            listaPastas.textContent =
+            "você ainda não possui pastas cadastradas.";
+            return;
+        }
+
+        pastas.forEach(pasta => {
+            const total = number(pasta.total_tarefas) || 0;
+            const concluidas = number(pasta.tarefas_concluidas) || 0;
+
+            const progresso = total > 0
+            ? Math.round ((concluidas / total) *100)
+            : 0;
+
+            const cartao = document.createElement("article");
+            cartao.className = "cartao-pasta";
+
+            const titulo = document.createElement("div");
+            titulo.className = "pasta-titulo";
+            
+            const icone = document.createElement("i");
+            icone.className = "fa-solid fa-folder pasta-icone";
+            icone.style.color = pasta.cor || "#2563EB";
+            
+            const nome = document.createElement("h3");
+            
+
+
+        })
+    }
+}
