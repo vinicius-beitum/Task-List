@@ -9,47 +9,95 @@
 <body>
     <main class="app-shell">
         <aside class="sidebar" aria-label="Navegação principal">
-            <div class="profile"><div class="avatar" aria-hidden="true">M</div><div><strong>Marcos</strong><small>Conta Pessoal</small></div></div>
-            <nav class="navigation">
+            <button class="profile profile-trigger" id="openProfile" type="button" aria-label="Editar perfil">
+                <span class="avatar" id="avatar"><span id="avatarInitial">M</span><img id="avatarImage" alt="" hidden></span>
+                <span class="profile-copy"><strong id="profileName">Marcos</strong><small>Conta Pessoal</small></span>
+                <span class="profile-edit-icon" aria-hidden="true">✎</span>
+            </button>
+            <nav class="navigation" aria-label="Tarefas">
                 <div class="brand"><span class="brand-icon">✓</span> MEU GERENCIADOR</div>
                 <button class="nav-link active" type="button" data-view="today"><span class="nav-icon">▦</span>Meu Dia</button>
-                <button class="nav-link" type="button" data-view="inbox"><span class="nav-icon">▤</span>Caixa de Entrada <b id="navPending">4</b></button>
+                <button class="nav-link" type="button" data-view="inbox"><span class="nav-icon">▤</span>Caixa de Entrada <b id="navPending">0</b></button>
                 <button class="nav-link" type="button" data-view="week"><span class="nav-icon">□</span>Próximos 7 Dias</button>
                 <button class="nav-link" type="button" data-view="completed"><span class="nav-icon">✓</span>Concluídos</button>
             </nav>
-            <p class="sidebar-status"><span></span>Sincronizado localmente</p>
+            <section class="sidebar-folders" aria-labelledby="foldersTitle">
+                <header class="sidebar-folders-header">
+                    <h2 id="foldersTitle">MINHAS PASTAS</h2>
+                    <button class="add-folder-button" id="openNewFolder" type="button" aria-label="Criar pasta">+</button>
+                </header>
+                <div class="folder-list" id="folderList"></div>
+            </section>
+            <p class="sidebar-status"><span></span>Salvo neste dispositivo</p>
         </aside>
         <section class="content" aria-labelledby="pageTitle">
             <header class="page-header">
-                <div><p class="eyebrow" id="currentDate">TERÇA-FEIRA, 15 DE SETEMBRO</p><h1 id="pageTitle">Minhas Tarefas</h1><p class="subtitle">Tudo o que importa, em um só lugar.</p></div>
-                <div class="pending-counter" aria-live="polite"><strong id="pendingTasks">4</strong><span>pendentes</span></div>
+                <div><p class="eyebrow" id="currentDate"></p><h1 id="pageTitle">Minhas Tarefas</h1><p class="subtitle">Tudo o que importa, em um só lugar.</p></div>
+                <div class="pending-counter" aria-live="polite"><strong id="pendingTasks">0</strong><span>pendentes</span></div>
             </header>
             <section class="tasks-container" aria-labelledby="sectionTitle">
-                <header class="tasks-header"><div><h2 id="sectionTitle">Hoje</h2><p>Suas tarefas ativas</p></div><span class="task-count" id="totalTasks">4 tarefas</span></header>
+                <header class="tasks-header">
+                    <div><h2 id="sectionTitle">Meu Dia</h2><p id="sectionDescription">Tarefas com vencimento hoje</p></div>
+                    <span class="task-count" id="totalTasks">0 tarefas</span>
+                </header>
+                <div id="appMessage" class="app-message" role="status" aria-live="polite" hidden></div>
                 <div id="taskList" class="task-list" aria-live="polite"></div>
-                <form class="task-form" id="taskForm">
-                    <label class="sr-only" for="taskInput">Nome da tarefa</label>
-                    <input id="taskInput" type="text" placeholder="Adicionar uma nova tarefa..." autocomplete="off" required>
-                    <div class="form-actions"><label class="date-control" for="taskDate"><span aria-hidden="true">◷</span><span id="dateLabel">Definir data e hora</span></label><input id="taskDate" type="datetime-local" aria-label="Data e hora de vencimento"><button type="submit">Adicionar</button></div>
-                </form>
-                <section class="secao-pastas">
-                    <div class="cabecalho-pastas">
-                        <div>
-                            <h2>Minhas Pastas</h2>
-                            <p>Organize suas tarefas por categoria.</p>
-                        </div>
-                        <button type="button" id="btnNovaPasta">
-                            <i class="fa-solid fa-plus"></i>
-                            Nova Pasta
-                        </button>
-                    </div>
-                    <div id="listasPastas" class="lista-pastas">
-                        <p>Carregando pastas...</p>
-                    </div>
-                </section>
+                <button class="primary-button add-task-button" id="openNewTask" type="button"><span aria-hidden="true">+</span> Adicionar tarefa</button>
             </section>
         </section>
     </main>
+
+    <dialog class="modal" id="taskDialog" aria-labelledby="taskDialogTitle">
+        <form class="modal-card" id="taskForm">
+            <header class="modal-header"><div><p class="eyebrow">TAREFA</p><h2 id="taskDialogTitle">Adicionar tarefa</h2></div><button class="icon-button" type="button" data-close="taskDialog" aria-label="Fechar">×</button></header>
+            <label class="field-label" for="taskTitle">Título</label>
+            <input class="text-field" id="taskTitle" name="title" type="text" maxlength="160" placeholder="O que você precisa fazer?" required>
+            <label class="field-label" for="taskDescription">Descrição <span>opcional</span></label>
+            <textarea class="text-field text-area" id="taskDescription" name="description" rows="3" maxlength="1000" placeholder="Adicione detalhes sobre esta tarefa"></textarea>
+            <div class="field-grid">
+                <div><label class="field-label" for="taskDueDate">Data e hora <span>opcional</span></label><input class="text-field date-field" id="taskDueDate" name="dueDate" type="datetime-local"></div>
+                <div><label class="field-label" for="taskPriority">Prioridade</label><select class="text-field" id="taskPriority" name="priority"><option value="low">Baixa</option><option value="medium" selected>Média</option><option value="high">Alta</option></select></div>
+            </div>
+            <label class="field-label" for="taskFolder">Pasta <span>opcional</span></label>
+            <select class="text-field" id="taskFolder" name="folderId"><option value="">Sem pasta</option></select>
+            <p class="form-error" id="taskFormError" role="alert" hidden></p>
+            <footer class="modal-actions"><button class="secondary-button" type="button" data-close="taskDialog">Cancelar</button><button class="primary-button" type="submit" id="saveTaskButton">Adicionar tarefa</button></footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="profileDialog" aria-labelledby="profileDialogTitle">
+        <form class="modal-card" id="profileForm">
+            <header class="modal-header"><div><p class="eyebrow">CONTA PESSOAL</p><h2 id="profileDialogTitle">Editar perfil</h2></div><button class="icon-button" type="button" data-close="profileDialog" aria-label="Fechar">×</button></header>
+            <div class="profile-preview-row"><span class="avatar avatar-large" id="profilePreview"><span id="profilePreviewInitial">M</span><img id="profilePreviewImage" alt="" hidden></span><div><strong>Sua foto de perfil</strong><p>Escolha uma imagem JPG, PNG ou WebP.</p></div></div>
+            <div class="profile-photo-actions"><label class="secondary-button file-button" for="profilePhoto">Escolher foto</label><input class="sr-only" id="profilePhoto" type="file" accept="image/png,image/jpeg,image/webp"><button class="text-button" id="removeProfilePhoto" type="button">Remover foto</button></div>
+            <label class="field-label" for="displayName">Nome de exibição</label>
+            <input class="text-field" id="displayName" name="displayName" type="text" maxlength="60" required>
+            <p class="form-error" id="profileFormError" role="alert" hidden></p>
+            <footer class="modal-actions"><button class="secondary-button" type="button" data-close="profileDialog">Cancelar</button><button class="primary-button" type="submit">Salvar perfil</button></footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="folderDialog" aria-labelledby="folderDialogTitle">
+        <form class="modal-card" id="folderForm">
+            <header class="modal-header"><div><p class="eyebrow">ORGANIZAÇÃO</p><h2 id="folderDialogTitle">Nova pasta</h2></div><button class="icon-button" type="button" data-close="folderDialog" aria-label="Fechar">×</button></header>
+            <label class="field-label" for="folderName">Nome da pasta</label>
+            <input class="text-field" id="folderName" name="name" type="text" maxlength="50" placeholder="Ex.: Estudos" required>
+            <label class="field-label" for="folderColor">Cor da pasta</label>
+            <input class="color-field" id="folderColor" name="color" type="color" value="#3b82f6">
+            <p class="form-error" id="folderFormError" role="alert" hidden></p>
+            <footer class="modal-actions"><button class="secondary-button" type="button" data-close="folderDialog">Cancelar</button><button class="primary-button" type="submit" id="saveFolderButton">Criar pasta</button></footer>
+        </form>
+    </dialog>
+
+    <dialog class="modal" id="deleteFolderDialog" aria-labelledby="deleteFolderTitle">
+        <div class="modal-card">
+            <header class="modal-header"><div><p class="eyebrow">EXCLUIR PASTA</p><h2 id="deleteFolderTitle">O que fazer com as tarefas?</h2></div><button class="icon-button" type="button" data-close="deleteFolderDialog" aria-label="Fechar">×</button></header>
+            <p class="modal-description">Escolha se deseja manter as tarefas na Caixa de Entrada ou excluí-las também. Esta ação não pode ser desfeita.</p>
+            <footer class="modal-actions modal-actions-stack"><button class="secondary-button" id="keepFolderTasks" type="button">Manter tarefas sem pasta</button><button class="danger-button" id="deleteFolderTasks" type="button">Excluir pasta e tarefas</button></footer>
+            <button class="text-button cancel-delete" type="button" data-close="deleteFolderDialog">Cancelar</button>
+        </div>
+    </dialog>
+
     <script src="home.js"></script>
 </body>
 </html>
