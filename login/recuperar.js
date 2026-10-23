@@ -1,6 +1,6 @@
 const formulario= document.getElementById("recuperarForm");
-const email = document.getElementById("email");
-const erro = document.getElementById("erroRecuperacao");
+const email = document.getElementById("emailRecuperacao");
+const erro = document.getElementById("erroEmailRecuperacao");
 
 // RECUPERAÇÃO DE SENHA 
 
@@ -23,7 +23,7 @@ if (!emailRegex.test(emailDigitado)) {
     return;
 }
 
-error.textContent = "";
+erro.textContent = "";
 email.classList.remove("input-erro");
 
 alert("Se esse email estiver cadastrado , você receberá as instruções para recuperar sua senha.");
@@ -31,7 +31,7 @@ alert("Se esse email estiver cadastrado , você receberá as instruções para r
 window.location.href = "login.html";
 });
 
-emial.addEventListener("input", function() {
+email.addEventListener("input", function() {
     erro.textContent = "";
     email.classList.remove("input-erro");
-});
+});

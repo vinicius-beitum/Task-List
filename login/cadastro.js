@@ -582,8 +582,11 @@ confirmarSenha.addEventListener("keydown", function(event) {
 
     if(event.key === "Enter") {
         event.preventDefault();
-        termos.checked = true;
-        formulario.requestSubmit()
+        if (termos.checked) {
+            formulario.requestSubmit();
+        } else {
+            termos.focus();
+        }
     }
 });
 
