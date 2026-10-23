@@ -645,6 +645,6 @@ document.querySelector("#profileForm").addEventListener("submit", (event) => {
 
 renderDate();
 window.setInterval(() => {
-    renderDate();
+    renderDate(); 
     renderTasks();
 }, 60_000);
