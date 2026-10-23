@@ -220,20 +220,20 @@ body {
     color: #c4d2e7;
 }
 
-.remenber-password lebel {
+.remember-password label {
     display: flex;
     align-items: center;
     gap: 6px;
     color: #c4d2e7;
 }
 
-.remenber-password input [type="checkbox"] {
+.remember-password input[type="checkbox"] {
     width: 15px;
     height: 15px;
     cursor: pointer;
 }
 
-.remenber-password a {
+.remember-password a {
     color: #c4d2e7;
     text-decoration: none;
     font-weight: 500;
@@ -274,10 +274,10 @@ body {
 }
 
 .texto-recuperacao {
-    color: #777;
+    color: #8fa4c1;
     font-size: 14px;
     line-height: 1.5;
-    margin-top: -25px;
+    margin-top: -17px;
     margin-bottom: 30px;
 }
 
@@ -603,7 +603,7 @@ body {
     border-radius: 18px;
     text-align: center;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-    animation: aparecerCadastro 0.3 ease;
+    animation: aparecerCadastro 0.3s ease;
 }
 
 .cadastro-sucesso .check {
@@ -699,7 +699,7 @@ body {
     display: flex;
     align-items: flex-start;
     gap: 9px;
-    color: #555;
+    color: #c4d2e7;
     font-size: 13px;
     line-height: 1.5;
     cursor: pointer;
@@ -710,11 +710,11 @@ body {
     height: 17px;
     margin-top: 2px;
     cursor: pointer;
-    accent-color: #1456d9;
+    accent-color: #1597ff;
 }
 
 .termos a {
-    color: #1456d9;
+    color: #20a4ff;
     font-weight: bold;
     text-decoration: none;
 }
@@ -866,7 +866,7 @@ body {
 @keyframes aparecerWelcome {
     from {
         opacity: 0;
-        transform: translateX(-30);
+        transform: translateX(-30px);
     }
     to {
         opacity: 1;
@@ -901,7 +901,8 @@ body {
     animation: aparecerConteudo 0.8s ease-out 0.4s both;
 }
 
-.remember-password {
+.remember-password,
+.termos {
     animation: aparecerConteudo 0.8s ease-out 0.5s both;
 }
 
@@ -944,10 +945,18 @@ body {
 }
 
 .saudacao-login p {
-    color: #777;
+    color: #8fa4c1;
     font-size: 14px;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     font-weight: 500;
+}
+
+.saudacao-login p:empty {
+    display: none;
+}
+
+.saudacao-login:has(p:not(:empty)) h1 {
+    margin-bottom: 6px;
 }
 
 /* ANIMAÇÃO DE ERRO DOS CAMPOS */
@@ -1344,11 +1353,6 @@ body::after {
     }
 }
 
-/* ================================= */
-/* PAINEL DE BOAS-VINDAS (cadastro e recuperar senha) */
-/* ================================= */
-
-/* centraliza o parágrafo dentro do painel */
 .welcome-content p {
     margin-left: auto;
     margin-right: auto;
@@ -1401,8 +1405,6 @@ body::after {
     color: #c4d8f5;
 }
 
-/* --- Cadastro: lista de vantagens --- */
-
 .welcome-lista li + li {
     margin-top: 18px;
     padding-top: 18px;
@@ -1423,8 +1425,6 @@ body::after {
     font-size: 16px;
 }
 
-/* --- Recuperar senha: passo a passo --- */
-
 .passos li {
     position: relative;
     padding-bottom: 24px;
@@ -1434,7 +1434,6 @@ body::after {
     padding-bottom: 0;
 }
 
-/* linha que liga um passo ao próximo */
 .passos li:not(:last-child)::after {
     content: "";
     position: absolute;
@@ -1460,8 +1459,6 @@ body::after {
     font-weight: bold;
 }
 
-/* entrada em sequência dos itens (reaproveita a animação que já existe) */
-
 .welcome-lista li,
 .passos li {
     animation: aparecerConteudo 0.7s ease-out both;
@@ -1483,7 +1480,6 @@ body::after {
     }
 }
 
-/* quebra de linha equilibrada nos títulos do painel */
 .welcome-content h2 {
     text-wrap: balance;
 }
