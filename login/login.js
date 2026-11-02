@@ -19,7 +19,7 @@ const loginSucesso = document.getElementById("loginSucesso");
 
 function campoComErro(campo) {
     
-    campo.classList.remove("campo-tremer");
+    campo.classList.remove("campo-treme");
     void campo.offsetWidth;
     campo.classList.add("campo-treme");
 }
@@ -37,7 +37,7 @@ window.addEventListener("load", function() {
         lembrar.checked = true;
 
         saudacaoLogin.querySelector("h1").textContent = "Olá Novamente! 💪"
-        emailSalvo.textContent = emailSalvo
+        emailSalvoLogin.textContent = emailSalvo
         
         trocarConta.classList.add("mostrar");
     } else {
@@ -355,4 +355,4 @@ trocarConta.addEventListener("click", function() {
     trocarConta.style.display = "none";
 
     email.focus();
-});
+});
