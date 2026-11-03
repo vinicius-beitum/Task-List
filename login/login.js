@@ -1,3 +1,9 @@
+import {
+    signInWithEmailAndPassword
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import { auth } from "../backend/js/firebase.js";
+
 const formulario = document.getElementById("loginForm");
 
 const email = document.getElementById("email");
@@ -50,7 +56,7 @@ window.addEventListener("load", function() {
 // FORMULÁRIO DE LOGIN
 
 
-formulario.addEventListener("submit", function(event) {
+formulario.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -173,50 +179,75 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
+    
     // LEMBRAR E-MAIL
-  
 
     if (lembrar.checked) {
-
         localStorage.setItem("email", emailDigitado);
-
     } else {
-
         localStorage.removeItem("email");
-
     }
 
     // MOSTRAR LOADING
 
     loginLoading.classList.add("mostrar");
 
-    setTimeout(function() {
+    try {
 
+        // AUTENTICAR USUÁRIO NO FIREBASE
 
-        // Esconde o loading
+        await signInWithEmailAndPassword(
+            auth,
+            emailDigitado,
+            senhaDigitada
+        );
+
+        // LOGIN REALIZADO
+
+        loginLoading.classList.remove("mostrar");
+        loginSucesso.classList.add("mostrar");
+
+        setTimeout(function() {
+            window.location.href = "../home/home.html";
+        }, 1000);
+
+    } catch (erro) {
 
         loginLoading.classList.remove("mostrar");
 
+        console.error("Erro no login:", erro);
 
-        // Mostra sucesso
+        if (
+            erro.code === "auth/invalid-credential" ||
+            erro.code === "auth/wrong-password" ||
+            erro.code === "auth/user-not-found"
+        ) {
 
-        loginSucesso.classList.add("mostrar");
+            erroEmail.textContent = "E-mail ou senha incorretos.";
+            campoComErro(email);
+            campoComErro(senha);
 
+        } else if (erro.code === "auth/too-many-requests") {
 
-        // Depois de 1 segundo vai para Home
+            erroSenha.textContent =
+                "Muitas tentativas. Tente novamente mais tarde.";
 
-        setTimeout(function() {
+            campoComErro(senha);
 
-            window.location.href = "../home/home.html";
+        } else if (erro.code === "auth/network-request-failed") {
 
-        }, 1000);
+            erroEmail.textContent =
+                "Erro de conexão. Verifique sua internet.";
 
+        } else {
 
-    }, 1500);
+            erroEmail.textContent =
+                "Não foi possível entrar. Tente novamente.";
+        }
+    }
 
 });
 
-// MOSTRAR / OCULTAR SENHA
 
 verSenha.addEventListener("click", function() {
 
@@ -355,4 +386,4 @@ trocarConta.addEventListener("click", function() {
     trocarConta.style.display = "none";
 
     email.focus();
-});
+});
