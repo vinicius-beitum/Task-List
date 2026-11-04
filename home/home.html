@@ -35,6 +35,65 @@
                 <div><p class="eyebrow" id="currentDate"></p><h1 id="pageTitle">Minhas Tarefas</h1><p class="subtitle">Tudo o que importa, em um só lugar.</p></div>
                 <div class="pending-counter" aria-live="polite"><strong id="pendingTasks">0</strong><span>pendentes</span></div>
             </header>
+            <section class="dashboard" aria-label="Resumo das Tarefas">
+
+                <div class="dashboard-header">
+                    <h2>Visão Geral</h2>
+                    <p>Acompanhe seu desempenho</p>
+                </div>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span class="stat-icon blue">🗃️</span>
+
+                        <div>
+                            <strong id="stat-total">0</strong>
+                            <span>Total de tarefas</span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <span class="stat-icon green">✓</span>
+                        <div>
+                            <strong id="statCompleted">0</strong>
+                            <span>Concluídas</span>
+                        </div>
+                    </article>
+                    
+                    <article class="stat-card">
+                        <span class="stat-icon yellow">◷</span>
+                        <div>
+                            <strong id="statpending">0</strong>
+                            <span>Pendentes</span>
+                        </div>
+                    </article>
+
+                    <article class="stat-card">
+                        <span class="stat-icon red">!</span>
+                        <div>
+                            <strong id="statOverdue">0</strong>
+                            <span>atrasadas</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="progress-card">
+                    <div class="progress-info">
+                        <div>
+                            <h3>Progresso Geral</h3>
+                            <p id="progressdescription">Nenhuma tarefa Concluída ainda.</p>
+                        </div>
+
+                        <strong id="progresspercentage">0%</strong>
+
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
             <section class="tasks-container" aria-labelledby="sectionTitle">
                 <header class="tasks-header">
                     <div><h2 id="sectionTitle">Meu Dia</h2><p id="sectionDescription">Tarefas com vencimento hoje</p></div>
