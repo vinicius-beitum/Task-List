@@ -1,3 +1,16 @@
+import {
+    createUserWithEmailAndPassword,
+    updateProfile
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import {
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import { auth, db } from "../backend/js/firebase.js";
+
 const formulario = document.getElementById("cadastroForm");
 
 const nome = document.getElementById("nome");
@@ -51,7 +64,7 @@ function campoComErro(campo) {
 
 }
 
-formulario.addEventListener("submit", function(event) {
+formulario.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -95,7 +108,6 @@ formulario.addEventListener("submit", function(event) {
 
     // VALIDAÇÃO DA SENHA
    
-
     if (senhaDigitada === "") {
 
         erroSenha.textContent = "⚠ Digite uma senha.";
@@ -195,26 +207,66 @@ formulario.addEventListener("submit", function(event) {
         return;
     }
 
-    // CADASTRO REALIZADO
+   // CADASTRO REALIZADO NO FIREBASE
 
-  // MOSTRAR TELA DE SUCESSO
+try {
 
-cadastroLoading.classList.add("mostrar");
+    cadastroLoading.classList.add("mostrar");
 
-setTimeout(function() {
+    // Criar usuário no Firebase Authentication
+    const credencial = await createUserWithEmailAndPassword(
+        auth,
+        emailDigitado,
+        senhaDigitada
+    );
+
+    const usuario = credencial.user;
+
+    // Salvar nome no perfil de autenticação
+    await updateProfile(usuario, {
+        displayName: nomeDigitado
+    });
+
+    // Salvar dados do usuário no Firestore
+    await setDoc(doc(db, "usuarios", usuario.uid), {
+        nome: nomeDigitado,
+        email: emailDigitado,
+        criadoEm: serverTimestamp()
+    });
 
     cadastroLoading.classList.remove("mostrar");
 
     cadastroSucesso.classList.add("mostrar");
 
     setTimeout(function() {
-
         window.location.href = "login.html";
-
     }, 1500);
 
-}, 1500);
+} catch (erro) {
 
+    cadastroLoading.classList.remove("mostrar");
+
+    console.error("Erro ao cadastrar:", erro);
+
+    if (erro.code === "auth/email-already-in-use") {
+
+        erroEmail.textContent = "⚠ Este e-mail já está cadastrado.";
+        email.classList.add("input-erro");
+        campoComErro(email);
+
+    } else if (erro.code === "auth/invalid-email") {
+
+        erroEmail.textContent = "⚠ E-mail inválido.";
+
+    } else if (erro.code === "auth/weak-password") {
+
+        erroSenha.textContent = "⚠ A senha não atende aos requisitos do Firebase.";
+
+    } else {
+
+        erroEmail.textContent = "⚠ Não foi possível criar sua conta. Tente novamente.";
+    }
+}
 });
 
 // MOSTRAR / OCULTAR SENHA
