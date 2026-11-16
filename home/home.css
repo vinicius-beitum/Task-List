@@ -176,3 +176,6 @@ button { cursor: pointer; }
     .modal-actions:not(.modal-actions-stack) { flex-direction: column-reverse; }
     .modal-actions:not(.modal-actions-stack) button { width: 100%; }
 }
+
+.logout-button { width: 100%; margin-top: auto; }
+.sidebar-status { margin-top: 14px; }

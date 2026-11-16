@@ -1,3 +1,7 @@
+import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+import { collection, doc, onSnapshot, writeBatch, getDocs, query, limit, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+import { auth, db } from "../backend/js/firebase.js";
+
 const taskForm = document.querySelector("#taskForm");
 const taskList = document.querySelector("#taskList");
 const taskDialog = document.querySelector("#taskDialog");
@@ -6,17 +10,15 @@ const taskDueDate = document.querySelector("#taskDueDate");
 const taskFolder = document.querySelector("#taskFolder");
 const taskFormError = document.querySelector("#taskFormError");
 const appMessage = document.querySelector("#appMessage");
-const accountEmail = localStorage.getItem("email") || "marcos";
-const storageKey = `taskflow:${accountEmail}`;
-const foldersStorageKey = `${storageKey}:folders`;
-const profileStorageKey = `${storageKey}:profile`;
-const notificationsStorageKey = `${storageKey}:notifications`;
+// As chaves só existem depois que sabemos quem é o usuário logado (uid)
+let currentUser = null;
+let storageKey, foldersStorageKey, profileStorageKey, notificationsStorageKey;
 const initialTasks = [];
 
 let tasks = [];
 let folders = [];
 let notifications = [];
-let profile = { displayName: "Marcos", photo: "" };
+let profile = { displayName: "Usuário", photo: "" };
 let currentView = "today";
 let editingTaskId = null;
 let editingFolderId = null;
@@ -273,7 +275,7 @@ function renderTasks() {
 }
 
 function renderProfile() {
-    const initial = (profile.displayName.trim()[0] || "M").toLocaleUpperCase("pt-BR");
+    const initial = (profile.displayName.trim()[0] || "U").toLocaleUpperCase("pt-BR");
     document.querySelector("#profileName").textContent = profile.displayName;
     document.querySelector("#avatarInitial").textContent = initial;
     const avatarImage = document.querySelector("#avatarImage");
@@ -358,7 +360,7 @@ function openProfileDialog() {
     profilePhotoChanged = false;
     document.querySelector("#profilePhoto").value = "";
     showFormError(document.querySelector("#profileFormError"), "");
-    document.querySelector("#profilePreviewInitial").textContent = (profile.displayName.trim()[0] || "M").toLocaleUpperCase("pt-BR");
+    document.querySelector("#profilePreviewInitial").textContent = (profile.displayName.trim()[0] || "U").toLocaleUpperCase("pt-BR");
     setProfilePreview(pendingProfilePhoto);
     document.querySelector("#profileDialog").showModal();
     document.querySelector("#displayName").focus();
@@ -409,7 +411,7 @@ function deleteFolder(keepTasks) {
         ? tasks.map((task) => task.folderId === folder.id ? { ...task, folderId: null } : task)
         : tasks.filter((task) => task.folderId !== folder.id);
 
-    if (!saveMultipleValues([[storageKey, nextTasks], [foldersStorageKey, nextFolders]])) return;
+    if (!commitCollections([["tarefas", tasks, nextTasks], ["pastas", folders, nextFolders]])) return;
     tasks = nextTasks;
     folders = nextFolders;
     if (currentView === `folder:${folder.id}`) currentView = "inbox";
@@ -420,31 +422,201 @@ function deleteFolder(keepTasks) {
     showMessage(keepTasks ? "Pasta excluída. As tarefas foram mantidas sem pasta." : "Pasta e tarefas associadas excluídas.", "success");
 }
 
-function initialize() {
-    tasks = readStoredValue(storageKey, initialTasks, isTaskList);
-    folders = readStoredValue(foldersStorageKey, [], isFolderList);
-    profile = readStoredValue(profileStorageKey, profile, isProfile);
-    notifications = readStoredValue(notificationsStorageKey, [], isNotificationList);
+// ================= FIRESTORE =================
+// Estrutura (a mesma do app mobile):
+//   usuarios/{uid}/tarefas/{id}  -> name, description, dueDate, priority, folderId, completed, criadoEm
+//   usuarios/{uid}/pastas/{id}   -> name, color, criadoEm
+//   usuarios/{uid}/dados/perfil  -> displayName, photo
+let unsubscribers = [];
 
-    if (localStorage.getItem(storageKey) === null && !saveValue(storageKey, tasks)) {
-        throw new Error("Não foi possível inicializar o armazenamento de tarefas.");
+function userCollection(name) {
+    return collection(db, "usuarios", currentUser.uid, name);
+}
+
+function itemData(item) {
+    const data = {};
+    Object.keys(item).forEach((key) => {
+        if (key !== "id" && item[key] !== undefined) data[key] = item[key];
+    });
+    return data;
+}
+
+function showSaveError(error) {
+    console.error("Erro ao salvar no Firestore:", error);
+    showMessage(error && error.code === "permission-denied"
+        ? "Sem permissão para salvar. Verifique as regras do Firestore."
+        : "Não foi possível salvar no servidor. Verifique sua conexão.");
+}
+
+// Compara a lista anterior com a nova e grava só o que mudou (em uma única operação atômica).
+// A tela já é atualizada pelo onSnapshot, inclusive offline (o Firestore guarda a fila).
+function commitCollections(changes) {
+    const batch = writeBatch(db);
+    let operations = 0;
+    changes.forEach(([name, previous, next]) => {
+        const previousById = new Map(previous.map((item) => [item.id, item]));
+        const nextIds = new Set(next.map((item) => item.id));
+        next.forEach((item) => {
+            const old = previousById.get(item.id);
+            const data = itemData(item);
+            if (old && JSON.stringify(itemData(old)) === JSON.stringify(data)) return;
+            if (!old && !data.criadoEm) data.criadoEm = Date.now();
+            batch.set(doc(db, "usuarios", currentUser.uid, name, item.id), data);
+            operations += 1;
+        });
+        previous.forEach((item) => {
+            if (nextIds.has(item.id)) return;
+            batch.delete(doc(db, "usuarios", currentUser.uid, name, item.id));
+            operations += 1;
+        });
+    });
+    if (operations === 0) return true;
+    batch.commit().catch(showSaveError);
+    return true;
+}
+
+function saveProfile(nextProfile) {
+    setDoc(doc(db, "usuarios", currentUser.uid, "dados", "perfil"), {
+        displayName: nextProfile.displayName,
+        photo: nextProfile.photo || ""
+    }).catch(showSaveError);
+    return true;
+}
+
+function sortByCreation(list) {
+    return list.sort((a, b) => (a.criadoEm || 0) - (b.criadoEm || 0));
+}
+
+function startListeners() {
+    stopListeners();
+    const onError = (error) => {
+        console.error("Erro ao ler do Firestore:", error);
+        showMessage(error && error.code === "permission-denied"
+            ? "Sem permissão para ler seus dados. Verifique as regras do Firestore."
+            : "Não foi possível carregar seus dados. Verifique sua conexão.");
+    };
+
+    unsubscribers.push(onSnapshot(userCollection("tarefas"), (snapshot) => {
+        tasks = sortByCreation(snapshot.docs.map((item) => ({
+            description: "", dueDate: "", priority: "medium", folderId: null, completed: false,
+            ...item.data(), id: item.id
+        })));
+        renderFolders();
+        renderTasks();
+    }, onError));
+
+    unsubscribers.push(onSnapshot(userCollection("pastas"), (snapshot) => {
+        folders = sortByCreation(snapshot.docs.map((item) => ({ color: "#3b82f6", ...item.data(), id: item.id })));
+        renderFolders();
+        renderTasks();
+    }, onError));
+
+    unsubscribers.push(onSnapshot(doc(db, "usuarios", currentUser.uid, "dados", "perfil"), (snapshot) => {
+        if (snapshot.exists()) {
+            const data = snapshot.data();
+            if (typeof data.displayName === "string" && data.displayName.trim()) {
+                profile = { displayName: data.displayName, photo: typeof data.photo === "string" ? data.photo : "" };
+            }
+        }
+        renderProfile();
+    }, onError));
+}
+
+function stopListeners() {
+    unsubscribers.forEach((unsubscribe) => unsubscribe());
+    unsubscribers = [];
+}
+
+// Quem já usava o site guardou tarefas no navegador: sobe tudo para o Firestore uma única vez
+async function migrateLocalToFirestore() {
+    const flag = `${storageKey}:migrado`;
+    if (localStorage.getItem(flag)) return;
+    try {
+        const localTasks = readStoredValue(storageKey, [], isTaskList);
+        const localFolders = readStoredValue(foldersStorageKey, [], isFolderList);
+        const localProfile = readStoredValue(profileStorageKey, null, isProfile);
+
+        const [remoteTasks, remoteFolders] = await Promise.all([
+            getDocs(query(userCollection("tarefas"), limit(1))),
+            getDocs(query(userCollection("pastas"), limit(1)))
+        ]);
+
+        if (remoteTasks.empty && remoteFolders.empty) {
+            const writes = [];
+            localFolders.forEach((item, index) => writes.push([doc(db, "usuarios", currentUser.uid, "pastas", item.id), { ...itemData(item), criadoEm: item.criadoEm || Date.now() + index }]));
+            localTasks.forEach((item, index) => writes.push([doc(db, "usuarios", currentUser.uid, "tarefas", item.id), { ...itemData(item), criadoEm: item.criadoEm || Date.now() + index }]));
+            if (localProfile && localProfile.displayName && localProfile.displayName !== "Usuário") {
+                writes.push([doc(db, "usuarios", currentUser.uid, "dados", "perfil"), { displayName: localProfile.displayName, photo: localProfile.photo || "" }]);
+            }
+            for (let start = 0; start < writes.length; start += 400) {
+                const batch = writeBatch(db);
+                writes.slice(start, start + 400).forEach(([reference, data]) => batch.set(reference, data));
+                await batch.commit();
+            }
+        }
+        localStorage.setItem(flag, "1");
+    } catch (error) {
+        // Não marca como migrado: tenta de novo no próximo acesso
+        console.error("Não foi possível migrar os dados locais:", error);
     }
-    if (!profile.displayName.trim()) profile.displayName = "Marcos";
+}
+
+// Dados antigos eram salvos pela chave do e-mail. Copia uma vez para a chave do uid.
+function migrateLegacyData() {
+    if (!currentUser.email || localStorage.getItem(storageKey) !== null) return;
+    const legacyKey = `taskflow:${currentUser.email}`;
+    ["", ":folders", ":profile", ":notifications"].forEach((suffix) => {
+        const value = localStorage.getItem(legacyKey + suffix);
+        if (value !== null) {
+            try { localStorage.setItem(storageKey + suffix, value); } catch (error) { /* ignora */ }
+        }
+    });
+}
+
+async function initialize() {
+    migrateLegacyData();
+    profile.displayName = currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "Usuário");
+    // Avisos de vencimento continuam locais (são calculados a partir das tarefas)
+    notifications = readStoredValue(notificationsStorageKey, [], isNotificationList);
     renderProfile();
     renderFolders();
     renderDate();
     renderTasks();
+    await migrateLocalToFirestore();
+    startListeners();
 }
 
-try {
-    initialize();
-} catch (error) {
-    taskList.innerHTML = "";
-    showMessage(error.message);
-    document.querySelector("#openNewTask").disabled = true;
-    document.querySelector("#openNewFolder").disabled = true;
-    document.querySelector("#openProfile").disabled = true;
-}
+// PROTEÇÃO DE ROTA: sem login, volta para a tela de login
+onAuthStateChanged(auth, (user) => {
+    if (!user) {
+        stopListeners();
+        window.location.replace("../login/login.html");
+        return;
+    }
+    currentUser = user;
+    storageKey = `taskflow:${user.uid}`;
+    foldersStorageKey = `${storageKey}:folders`;
+    profileStorageKey = `${storageKey}:profile`;
+    notificationsStorageKey = `${storageKey}:notifications`;
+
+    initialize().catch((error) => {
+        taskList.innerHTML = "";
+        showMessage(error.message);
+        document.querySelector("#openNewTask").disabled = true;
+        document.querySelector("#openNewFolder").disabled = true;
+        document.querySelector("#openProfile").disabled = true;
+    });
+});
+
+document.querySelector("#logoutButton").addEventListener("click", async () => {
+    try {
+        stopListeners();
+        await signOut(auth);
+        window.location.href = "../login/login.html";
+    } catch (error) {
+        showMessage("Não foi possível sair da conta. Tente novamente.");
+    }
+});
 
 document.querySelector("#openNewTask").addEventListener("click", () => openTaskDialog());
 document.querySelector("#openNewFolder").addEventListener("click", () => openFolderDialog());
@@ -483,7 +655,7 @@ taskForm.addEventListener("submit", (event) => {
     const nextTasks = existingTask
         ? tasks.map((item) => item.id === existingTask.id ? task : item)
         : [...tasks, task];
-    if (!saveValue(storageKey, nextTasks)) return;
+    if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
 
     tasks = nextTasks;
     taskDialog.close();
@@ -498,7 +670,7 @@ taskList.addEventListener("change", (event) => {
     const task = tasks.find((item) => item.id === article.dataset.id);
     if (!task) return;
     const nextTasks = tasks.map((item) => item.id === task.id ? { ...item, completed: event.target.checked } : item);
-    if (!saveValue(storageKey, nextTasks)) {
+    if (!commitCollections([["tarefas", tasks, nextTasks]])) {
         event.target.checked = task.completed;
         return;
     }
@@ -519,7 +691,7 @@ taskList.addEventListener("click", (event) => {
     }
     if (event.target.closest(".notice-complete")) {
         const nextTasks = tasks.map((item) => item.id === task.id ? { ...item, completed: true } : item);
-        if (!saveValue(storageKey, nextTasks)) return;
+        if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
         tasks = nextTasks;
         renderFolders();
         renderTasks();
@@ -532,7 +704,7 @@ taskList.addEventListener("click", (event) => {
     }
     if (event.target.closest(".remove") && window.confirm("Você realmente deseja excluir essa tarefa?")) {
         const nextTasks = tasks.filter((item) => item.id !== task.id);
-        if (!saveValue(storageKey, nextTasks)) return;
+        if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
         tasks = nextTasks;
         renderFolders();
         renderTasks();
@@ -586,7 +758,7 @@ document.querySelector("#folderForm").addEventListener("submit", (event) => {
     const nextFolders = current
         ? folders.map((item) => item.id === current.id ? folder : item)
         : [...folders, folder];
-    if (!saveValue(foldersStorageKey, nextFolders)) return;
+    if (!commitCollections([["pastas", folders, nextFolders]])) return;
     folders = nextFolders;
     document.querySelector("#folderDialog").close();
     renderFolders();
@@ -620,7 +792,7 @@ document.querySelector("#removeProfilePhoto").addEventListener("click", () => {
 });
 
 document.querySelector("#displayName").addEventListener("input", (event) => {
-    const initial = (event.target.value.trim()[0] || "M").toLocaleUpperCase("pt-BR");
+    const initial = (event.target.value.trim()[0] || "U").toLocaleUpperCase("pt-BR");
     document.querySelector("#profilePreviewInitial").textContent = initial;
 });
 
@@ -632,12 +804,19 @@ document.querySelector("#profileForm").addEventListener("submit", (event) => {
         showFormError(errorElement, "Informe seu nome de exibição.");
         return;
     }
+    if (profilePhotoChanged && pendingProfilePhoto && pendingProfilePhoto.length > 900000) {
+        showFormError(errorElement, "A foto é muito grande. Escolha uma imagem menor.");
+        return;
+    }
     const nextProfile = {
         displayName,
         photo: profilePhotoChanged ? pendingProfilePhoto : profile.photo
     };
-    if (!saveValue(profileStorageKey, nextProfile)) return;
+    if (!saveProfile(nextProfile)) return;
     profile = nextProfile;
+    if (currentUser && currentUser.displayName !== displayName) {
+        updateProfile(currentUser, { displayName }).catch((error) => console.error("Não foi possível atualizar o nome na conta:", error));
+    }
     document.querySelector("#profileDialog").close();
     renderProfile();
     showMessage("Perfil atualizado.", "success");
@@ -645,6 +824,7 @@ document.querySelector("#profileForm").addEventListener("submit", (event) => {
 
 renderDate();
 window.setInterval(() => {
+    if (!currentUser) return;
     renderDate();
     renderTasks();
 }, 60_000);
