@@ -1,3 +1,17 @@
+import {
+    createUserWithEmailAndPassword,
+    updateProfile,
+    signOut
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import {
+    doc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import { auth, db } from "../backend/js/firebase.js";
+
 const formulario = document.getElementById("cadastroForm");
 
 const nome = document.getElementById("nome");
@@ -51,7 +65,7 @@ function campoComErro(campo) {
 
 }
 
-formulario.addEventListener("submit", function(event) {
+formulario.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -95,7 +109,6 @@ formulario.addEventListener("submit", function(event) {
 
     // VALIDAÇÃO DA SENHA
    
-
     if (senhaDigitada === "") {
 
         erroSenha.textContent = "⚠ Digite uma senha.";
@@ -105,10 +118,10 @@ formulario.addEventListener("submit", function(event) {
         return;
     }
 
-    if (senhaDigitada.length < 4) {
+    if (senhaDigitada.length < 6) {
 
         erroSenha.textContent =
-            "⚠ A senha deve ter pelo menos 4 caracteres.";
+            "⚠ A senha deve ter pelo menos 6 caracteres.";
 
         senha.classList.add("input-erro");
         campoComErro(senha);
@@ -195,26 +208,79 @@ formulario.addEventListener("submit", function(event) {
         return;
     }
 
-    // CADASTRO REALIZADO
+   // CADASTRO REALIZADO NO FIREBASE
 
-  // MOSTRAR TELA DE SUCESSO
+try {
 
-cadastroLoading.classList.add("mostrar");
+    cadastroLoading.classList.add("mostrar");
 
-setTimeout(function() {
+    // Criar usuário no Firebase Authentication
+    const credencial = await createUserWithEmailAndPassword(
+        auth,
+        emailDigitado,
+        senhaDigitada
+    );
+
+    const usuario = credencial.user;
+
+    // Salvar nome no perfil de autenticação
+    await updateProfile(usuario, {
+        displayName: nomeDigitado
+    });
+
+    // Salvar dados do usuário no Firestore
+    // (se falhar, a conta já existe no Auth: não bloqueia o cadastro)
+    try {
+        await setDoc(doc(db, "usuarios", usuario.uid), {
+            nome: nomeDigitado,
+            email: emailDigitado,
+            criadoEm: serverTimestamp()
+        });
+    } catch (erroFirestore) {
+        console.error("Conta criada, mas não foi possível salvar no Firestore:", erroFirestore);
+    }
+
+    // O Firebase já deixa o usuário logado após criar a conta.
+    // Saímos para que ele entre pela tela de login, como a mensagem informa.
+    await signOut(auth);
 
     cadastroLoading.classList.remove("mostrar");
 
     cadastroSucesso.classList.add("mostrar");
 
     setTimeout(function() {
-
         window.location.href = "login.html";
-
     }, 1500);
 
-}, 1500);
+} catch (erro) {
 
+    cadastroLoading.classList.remove("mostrar");
+
+    console.error("Erro ao cadastrar:", erro);
+
+    if (erro.code === "auth/email-already-in-use") {
+
+        erroEmail.textContent = "⚠ Este e-mail já está cadastrado.";
+        email.classList.add("input-erro");
+        campoComErro(email);
+
+    } else if (erro.code === "auth/invalid-email") {
+
+        erroEmail.textContent = "⚠ E-mail inválido.";
+
+    } else if (erro.code === "auth/weak-password") {
+
+        erroSenha.textContent = "⚠ A senha não atende aos requisitos do Firebase.";
+
+    } else if (erro.code === "auth/network-request-failed") {
+
+        erroEmail.textContent = "⚠ Erro de conexão. Verifique sua internet.";
+
+    } else {
+
+        erroEmail.textContent = "⚠ Não foi possível criar sua conta. Tente novamente.";
+    }
+}
 });
 
 // MOSTRAR / OCULTAR SENHA
@@ -299,7 +365,7 @@ senha.addEventListener("input", function() {
 
     }
 
-    if (valor.length >= 4) {
+    if (valor.length >= 6) {
 
         reqTamanho.classList.add("valido");
 
@@ -410,7 +476,7 @@ senha.addEventListener("input", function() {
 
     let pontos = 0;
 
-    if (valor.length >= 4) {
+    if (valor.length >= 6) {
         
         pontos++;
     }
@@ -558,19 +624,19 @@ nome.addEventListener("keydown", function(event) {
 
     if (event.key === "Enter") {
         event.preventDefault();
-        emailCadastro.focus();
+        email.focus();
     }
 });
 
-emailCadastro.addEventListener("keydown", function(event) {
+email.addEventListener("keydown", function(event) {
 
     if(event.key === "Enter") {
         event.preventDefault();
-        senhaCadastro.focus();
+        senha.focus();
     }
 });
 
-senhaCadastro.addEventListener("keydown", function(event) {
+senha.addEventListener("keydown", function(event) {
 
     if(event.key === "Enter") {
         event.preventDefault();

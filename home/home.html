@@ -10,8 +10,8 @@
     <main class="app-shell">
         <aside class="sidebar" aria-label="Navegação principal">
             <button class="profile profile-trigger" id="openProfile" type="button" aria-label="Editar perfil">
-                <span class="avatar" id="avatar"><span id="avatarInitial">M</span><img id="avatarImage" alt="" hidden></span>
-                <span class="profile-copy"><strong id="profileName">Marcos</strong><small>Conta Pessoal</small></span>
+                <span class="avatar" id="avatar"><span id="avatarInitial">U</span><img id="avatarImage" alt="" hidden></span>
+                <span class="profile-copy"><strong id="profileName">Usuário</strong><small>Conta Pessoal</small></span>
                 <span class="profile-edit-icon" aria-hidden="true">✎</span>
             </button>
             <nav class="navigation" aria-label="Tarefas">
@@ -28,7 +28,8 @@
                 </header>
                 <div class="folder-list" id="folderList"></div>
             </section>
-            <p class="sidebar-status"><span></span>Salvo neste dispositivo</p>
+            <button class="secondary-button logout-button" id="logoutButton" type="button">Sair da conta</button>
+            <p class="sidebar-status"><span></span>Sincronizado com sua conta</p>
         </aside>
         <section class="content" aria-labelledby="pageTitle">
             <header class="page-header">
@@ -127,7 +128,7 @@
     <dialog class="modal" id="profileDialog" aria-labelledby="profileDialogTitle">
         <form class="modal-card" id="profileForm">
             <header class="modal-header"><div><p class="eyebrow">CONTA PESSOAL</p><h2 id="profileDialogTitle">Editar perfil</h2></div><button class="icon-button" type="button" data-close="profileDialog" aria-label="Fechar">×</button></header>
-            <div class="profile-preview-row"><span class="avatar avatar-large" id="profilePreview"><span id="profilePreviewInitial">M</span><img id="profilePreviewImage" alt="" hidden></span><div><strong>Sua foto de perfil</strong><p>Escolha uma imagem JPG, PNG ou WebP.</p></div></div>
+            <div class="profile-preview-row"><span class="avatar avatar-large" id="profilePreview"><span id="profilePreviewInitial">U</span><img id="profilePreviewImage" alt="" hidden></span><div><strong>Sua foto de perfil</strong><p>Escolha uma imagem JPG, PNG ou WebP.</p></div></div>
             <div class="profile-photo-actions"><label class="secondary-button file-button" for="profilePhoto">Escolher foto</label><input class="sr-only" id="profilePhoto" type="file" accept="image/png,image/jpeg,image/webp"><button class="text-button" id="removeProfilePhoto" type="button">Remover foto</button></div>
             <label class="field-label" for="displayName">Nome de exibição</label>
             <input class="text-field" id="displayName" name="displayName" type="text" maxlength="60" required>
@@ -157,6 +158,6 @@
         </div>
     </dialog>
 
-    <script src="home.js"></script>
+    <script type="module" src="home.js"></script>
 </body>
 </html>

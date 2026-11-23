@@ -1,3 +1,22 @@
+import {
+    signInWithEmailAndPassword,
+    signInWithPopup,
+    GoogleAuthProvider,
+    setPersistence,
+    browserLocalPersistence,
+    browserSessionPersistence,
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
+
+import {
+    doc,
+    getDoc,
+    setDoc,
+    serverTimestamp
+} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+
+import { auth, db } from "../backend/js/firebase.js";
+
 const formulario = document.getElementById("loginForm");
 
 const email = document.getElementById("email");
@@ -16,6 +35,15 @@ const erroSenha = document.getElementById("erroSenha");
 
 const loginLoading = document.getElementById("loginLoading");
 const loginSucesso = document.getElementById("loginSucesso");
+
+let loginEmAndamento = false;
+
+// Se já existe sessão ativa, vai direto para a home
+onAuthStateChanged(auth, function(usuario) {
+    if (usuario && !loginEmAndamento) {
+        window.location.replace("../home/home.html");
+    }
+});
 
 function campoComErro(campo) {
     
@@ -50,7 +78,7 @@ window.addEventListener("load", function() {
 // FORMULÁRIO DE LOGIN
 
 
-formulario.addEventListener("submit", function(event) {
+formulario.addEventListener("submit", async function(event) {
 
     event.preventDefault();
 
@@ -102,121 +130,90 @@ formulario.addEventListener("submit", function(event) {
 
     }
 
-    // VALIDAR TAMANHO DA SENHA
-
-    if (senhaDigitada.length < 4) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve ter pelo menos 4 caracteres.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-
-    }
-
-    // LETRA MAIÚSCULA
-
-    if (!/[A-Z]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve conter pelo menos uma letra maiúscula.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-
-    }
-
-    // LETRA MINÚSCULA
-
-
-    if (!/[a-z]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve conter pelo menos uma letra minúscula.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-
-    }
-
-    // NÚMERO
-
-    if (!/[0-9]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve conter pelo menos um número.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-
-    }
-
-    // CARACTERE ESPECIAL
-
-    if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve conter pelo menos um caractere especial.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-
-    }
+    // Obs.: as regras de complexidade da senha valem só no cadastro.
+    // No login quem decide se a senha está certa é o Firebase.
 
     // LEMBRAR E-MAIL
-  
 
     if (lembrar.checked) {
-
         localStorage.setItem("email", emailDigitado);
-
     } else {
-
         localStorage.removeItem("email");
-
     }
 
     // MOSTRAR LOADING
 
     loginLoading.classList.add("mostrar");
+    loginEmAndamento = true;
 
-    setTimeout(function() {
+    try {
 
+        // "Lembrar" marcado = sessão fica salva; desmarcado = acaba ao fechar a aba
+        await setPersistence(
+            auth,
+            lembrar.checked ? browserLocalPersistence : browserSessionPersistence
+        );
 
-        // Esconde o loading
+        // AUTENTICAR USUÁRIO NO FIREBASE
+
+        await signInWithEmailAndPassword(
+            auth,
+            emailDigitado,
+            senhaDigitada
+        );
+
+        // LOGIN REALIZADO
 
         loginLoading.classList.remove("mostrar");
-
-
-        // Mostra sucesso
-
         loginSucesso.classList.add("mostrar");
 
-
-        // Depois de 1 segundo vai para Home
-
         setTimeout(function() {
-
             window.location.href = "../home/home.html";
-
         }, 1000);
 
+    } catch (erro) {
 
-    }, 1500);
+        loginEmAndamento = false;
+        loginLoading.classList.remove("mostrar");
+
+        console.error("Erro no login:", erro);
+
+        if (erro.code === "auth/invalid-email") {
+
+            erroEmail.textContent = "⚠ Digite um e-mail válido.";
+            campoComErro(email);
+
+        } else if (
+            erro.code === "auth/invalid-credential" ||
+            erro.code === "auth/wrong-password" ||
+            erro.code === "auth/user-not-found"
+        ) {
+
+            erroEmail.textContent = "E-mail ou senha incorretos.";
+            campoComErro(email);
+            campoComErro(senha);
+
+        } else if (erro.code === "auth/too-many-requests") {
+
+            erroSenha.textContent =
+                "Muitas tentativas. Tente novamente mais tarde.";
+
+            campoComErro(senha);
+
+        } else if (erro.code === "auth/network-request-failed") {
+
+            erroEmail.textContent =
+                "Erro de conexão. Verifique sua internet.";
+
+        } else {
+
+            erroEmail.textContent =
+                "Não foi possível entrar. Tente novamente.";
+        }
+    }
 
 });
 
-// MOSTRAR / OCULTAR SENHA
 
 verSenha.addEventListener("click", function() {
 
@@ -355,4 +352,74 @@ trocarConta.addEventListener("click", function() {
     trocarConta.style.display = "none";
 
     email.focus();
-});
+});
+
+
+// LOGIN COM GOOGLE
+
+const botaoGoogle = document.querySelector(".botao-social.google");
+const botaoApple = document.querySelector(".botao-social.apple");
+
+botaoGoogle.addEventListener("click", async function() {
+
+    loginEmAndamento = true;
+    erroEmail.textContent = "";
+
+    try {
+
+        await setPersistence(
+            auth,
+            lembrar.checked ? browserLocalPersistence : browserSessionPersistence
+        );
+
+        const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
+        const usuario = resultado.user;
+
+        // Primeiro acesso com Google: cria o documento do usuário (mesma estrutura do cadastro)
+        try {
+            const ref = doc(db, "usuarios", usuario.uid);
+            const existente = await getDoc(ref);
+
+            if (!existente.exists()) {
+                await setDoc(ref, {
+                    nome: usuario.displayName || "",
+                    email: usuario.email || "",
+                    criadoEm: serverTimestamp()
+                });
+            }
+        } catch (erroFirestore) {
+            console.error("Login ok, mas não foi possível salvar o usuário no Firestore:", erroFirestore);
+        }
+
+        loginSucesso.classList.add("mostrar");
+
+        setTimeout(function() {
+            window.location.href = "../home/home.html";
+        }, 1000);
+
+    } catch (erro) {
+
+        loginEmAndamento = false;
+        console.error("Erro no login com Google:", erro);
+
+        // Fechar o popup não é erro de verdade
+        if (erro.code === "auth/popup-closed-by-user" || erro.code === "auth/cancelled-popup-request") {
+            return;
+        }
+
+        if (erro.code === "auth/popup-blocked") {
+            erroEmail.textContent = "⚠ O navegador bloqueou a janela do Google. Libere pop-ups e tente de novo.";
+        } else if (erro.code === "auth/unauthorized-domain") {
+            erroEmail.textContent = "⚠ Este domínio não está autorizado no Firebase (Authentication > Settings > Authorized domains).";
+        } else if (erro.code === "auth/network-request-failed") {
+            erroEmail.textContent = "⚠ Erro de conexão. Verifique sua internet.";
+        } else {
+            erroEmail.textContent = "⚠ Não foi possível entrar com o Google. Tente novamente.";
+        }
+    }
+});
+
+// Apple exige conta de desenvolvedor Apple paga: fica para uma próxima etapa
+botaoApple.addEventListener("click", function() {
+    erroEmail.textContent = "Login com Apple em breve.";
+});
