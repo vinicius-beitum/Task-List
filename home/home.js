@@ -1,6 +1,6 @@
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { collection, doc, onSnapshot, writeBatch, getDocs, query, limit, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { auth, db } from "../backend/js/firebase.js";
+import { auth, db } from "../shared/firebase.js";
 
 const taskForm = document.querySelector("#taskForm");
 const taskList = document.querySelector("#taskList");

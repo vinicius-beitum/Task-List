@@ -10,7 +10,7 @@ import {
     serverTimestamp
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
-import { auth, db } from "../backend/js/firebase.js";
+import { auth, db } from "../shared/firebase.js";
 
 const formulario = document.getElementById("cadastroForm");
 

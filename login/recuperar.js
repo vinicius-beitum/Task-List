@@ -1,5 +1,5 @@
 import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { auth } from "../backend/js/firebase.js";
+import { auth } from "../shared/firebase.js";
 
 const formulario = document.getElementById("recuperarForm");
 const email = document.getElementById("emailRecuperacao");
