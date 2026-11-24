@@ -1,830 +1,418 @@
-import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { collection, doc, onSnapshot, writeBatch, getDocs, query, limit, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-import { auth, db } from "../backend/js/firebase.js";
+import { auth, onAuthStateChanged, signOut, updateProfile } from "../shared/firebase.js";
+import { ensureUserDocument } from "../shared/user-service.js";
+import { formatLongDate, getDueStatus } from "./date-utils.js";
+import { createTaskRepository } from "./task-repository.js";
+import {
+    VIEWS,
+    FOLDER_VIEW_PREFIX,
+    countTasks,
+    createViewContext,
+    getFolderIdFromView,
+    getVisibleTasks,
+    resolveView
+} from "./task-views.js";
+import { renderAvatar, renderFolderList, renderTaskList } from "./render.js";
+import { createTaskDialog, endOfTodayInputValue } from "./task-dialog.js";
+import { createFolderDialog } from "./folder-dialog.js";
+import { createProfileDialog } from "./profile-dialog.js";
+import { showToast } from "./toast.js";
 
-const taskForm = document.querySelector("#taskForm");
-const taskList = document.querySelector("#taskList");
-const taskDialog = document.querySelector("#taskDialog");
-const taskTitle = document.querySelector("#taskTitle");
-const taskDueDate = document.querySelector("#taskDueDate");
-const taskFolder = document.querySelector("#taskFolder");
-const taskFormError = document.querySelector("#taskFormError");
-const appMessage = document.querySelector("#appMessage");
-// As chaves só existem depois que sabemos quem é o usuário logado (uid)
-let currentUser = null;
-let storageKey, foldersStorageKey, profileStorageKey, notificationsStorageKey;
-const initialTasks = [];
+const LOGIN_URL = "../login/login.html";
+const LAST_VIEW_KEY = "taskflow:last-view";
+const REFRESH_INTERVAL = 60_000;
 
-let tasks = [];
-let folders = [];
-let notifications = [];
-let profile = { displayName: "Usuário", photo: "" };
-let currentView = "today";
-let editingTaskId = null;
-let editingFolderId = null;
-let deletingFolderId = null;
-let pendingProfilePhoto;
-let profilePhotoChanged = false;
-let messageTimer;
+const elements = {
+    profileButton: document.getElementById("open-profile"),
+    sidebarAvatar: document.getElementById("sidebar-avatar"),
+    profileName: document.getElementById("profile-name"),
+    sidebar: document.querySelector(".sidebar"),
+    folderList: document.getElementById("folder-list"),
+    foldersEmpty: document.getElementById("folders-empty"),
+    connectionStatus: document.getElementById("connection-status"),
+    connectionLabel: document.getElementById("connection-label"),
+    currentDate: document.getElementById("current-date"),
+    greeting: document.getElementById("greeting"),
+    summary: document.getElementById("summary"),
+    viewTitle: document.getElementById("view-title"),
+    viewDescription: document.getElementById("view-description"),
+    taskCount: document.getElementById("task-count"),
+    newTaskButton: document.getElementById("new-task"),
+    taskList: document.getElementById("task-list"),
+    emptyState: document.getElementById("empty-state"),
+    deleteFolderDialog: document.getElementById("delete-folder-dialog"),
+    deleteFolderDescription: document.getElementById("delete-folder-description")
+};
 
-function readStoredValue(key, fallback, isValid) {
-    const value = localStorage.getItem(key);
-    if (value === null) return fallback;
+const state = {
+    user: null,
+    tasks: [],
+    folders: [],
+    profile: { displayName: "", photo: "" },
+    viewId: readLastView(),
+    hasLoadedTasks: false,
+    folderBeingDeleted: null
+};
 
-    let parsed;
+let repository = null;
+let unsubscribers = [];
+
+const taskDialog = createTaskDialog({ onSubmit: saveTask });
+const folderDialog = createFolderDialog({ onSubmit: saveFolder });
+const profileDialog = createProfileDialog({ onSubmit: saveProfile });
+
+/* ---------- Utilidades ---------- */
+
+function readLastView() {
     try {
-        parsed = JSON.parse(value);
-    } catch (error) {
-        throw new Error(`Não foi possível ler os dados salvos (${key}). Os dados existentes foram preservados.`);
-    }
-
-    if (!isValid(parsed)) {
-        throw new Error(`Os dados salvos (${key}) estão em um formato inválido e foram preservados.`);
-    }
-    return parsed;
-}
-
-function isTaskList(value) {
-    return Array.isArray(value) && value.every((task) => task && typeof task === "object" && typeof task.id === "string" && typeof task.name === "string");
-}
-
-function isFolderList(value) {
-    return Array.isArray(value) && value.every((folder) => folder && typeof folder.id === "string" && typeof folder.name === "string" && typeof folder.color === "string");
-}
-
-function isProfile(value) {
-    return value && typeof value === "object" && typeof value.displayName === "string" && typeof value.photo === "string";
-}
-
-function isNotificationList(value) {
-    return Array.isArray(value) && value.every((notification) => notification && typeof notification.id === "string"
-        && typeof notification.taskId === "string" && typeof notification.dueDate === "string"
-        && typeof notification.message === "string" && typeof notification.createdAt === "string");
-}
-
-function showMessage(message, type = "error") {
-    window.clearTimeout(messageTimer);
-    appMessage.textContent = message;
-    appMessage.className = `app-message ${type}`;
-    appMessage.hidden = false;
-    messageTimer = window.setTimeout(() => { appMessage.hidden = true; }, 6000);
-}
-
-function showFormError(element, message) {
-    element.textContent = message;
-    element.hidden = !message;
-}
-
-function saveValue(key, value) {
-    try {
-        localStorage.setItem(key, JSON.stringify(value));
-        return true;
-    } catch (error) {
-        const message = error.name === "QuotaExceededError"
-            ? "O armazenamento do navegador está cheio. Libere espaço e tente novamente."
-            : "Não foi possível salvar no navegador. Verifique as permissões de armazenamento.";
-        showMessage(message);
-        return false;
+        return localStorage.getItem(LAST_VIEW_KEY) ?? "today";
+    } catch {
+        return "today";
     }
 }
 
-function saveMultipleValues(changes) {
-    const previousValues = changes.map(([key]) => [key, localStorage.getItem(key)]);
+function plural(count, singular, pluralForm) {
+    return `${count} ${count === 1 ? singular : pluralForm}`;
+}
+
+function getGreeting(date) {
+    const hour = date.getHours();
+    if (hour >= 5 && hour < 12) return "Bom dia";
+    if (hour >= 12 && hour < 18) return "Boa tarde";
+    return "Boa noite";
+}
+
+function persist(operation) {
+    operation.catch((error) => {
+        console.error("Erro ao salvar no Firestore:", error);
+        const message = error?.code === "permission-denied"
+            ? "Você não tem permissão para fazer essa alteração."
+            : "Não foi possível salvar a alteração. Tente novamente.";
+        showToast(message, { type: "error" });
+    });
+}
+
+function handleReadError(error) {
+    console.error("Erro ao ler do Firestore:", error);
+    showToast("Não foi possível carregar seus dados. Recarregue a página.", { type: "error", duration: 8000 });
+}
+
+function findTask(taskId) {
+    return state.tasks.find((task) => task.id === taskId);
+}
+
+function findFolder(folderId) {
+    return state.folders.find((folder) => folder.id === folderId);
+}
+
+/* ---------- Renderização ---------- */
+
+function buildSummary(dueToday, overdue, pending) {
+    if (dueToday && overdue) {
+        return `Você tem ${plural(dueToday, "tarefa", "tarefas")} para hoje e ${plural(overdue, "atrasada", "atrasadas")}.`;
+    }
+    if (dueToday) return `Você tem ${plural(dueToday, "tarefa", "tarefas")} para hoje.`;
+    if (overdue) return `Você tem ${plural(overdue, "tarefa atrasada", "tarefas atrasadas")}.`;
+    if (pending) return `Nada vence hoje. Você tem ${plural(pending, "tarefa pendente", "tarefas pendentes")}.`;
+    return "Tudo em dia. Nenhuma tarefa pendente.";
+}
+
+function renderHeader(now, context) {
+    const firstName = state.profile.displayName.trim().split(/\s+/)[0];
+    const pending = state.tasks.filter((task) => !task.completed);
+    const overdue = pending.filter((task) => getDueStatus(task.dueDate, now) === "overdue").length;
+    const dueToday = countTasks(state.tasks, VIEWS.today, context) - overdue;
+
+    elements.currentDate.textContent = formatLongDate(now);
+    elements.greeting.textContent = firstName ? `${getGreeting(now)}, ${firstName}` : getGreeting(now);
+    elements.summary.textContent = state.hasLoadedTasks ? buildSummary(dueToday, overdue, pending.length) : "";
+
+    return overdue;
+}
+
+function render() {
+    const now = new Date();
+    const context = createViewContext(state.folders, now);
+    let view = resolveView(state.viewId, state.folders);
+
+    if (!VIEWS[state.viewId] && !view.folder) {
+        state.viewId = "today";
+        view = VIEWS.today;
+    }
+
+    const overdue = renderHeader(now, context);
+    renderSidebar(context, overdue);
+
+    elements.viewTitle.textContent = view.title;
+    elements.viewDescription.textContent = view.description;
+    elements.newTaskButton.hidden = state.viewId === "completed";
+    document.title = `${view.title} · TaskFlow`;
+
+    if (!state.hasLoadedTasks) return;
+
+    const visibleTasks = getVisibleTasks(state.tasks, view, context);
+    elements.taskCount.textContent = `· ${plural(visibleTasks.length, "tarefa", "tarefas")}`;
+
+    renderTaskList(elements.taskList, elements.emptyState, {
+        tasks: visibleTasks,
+        view,
+        now,
+        foldersById: new Map(state.folders.map((folder) => [folder.id, folder])),
+        showFolder: !view.folder
+    });
+}
+
+function renderSidebar(context, overdue) {
+    const pendingByFolder = new Map();
+    state.tasks.forEach((task) => {
+        if (!task.completed && task.folderId) {
+            pendingByFolder.set(task.folderId, (pendingByFolder.get(task.folderId) ?? 0) + 1);
+        }
+    });
+
+    renderAvatar(elements.sidebarAvatar, { name: state.profile.displayName, photo: state.profile.photo });
+    elements.profileName.textContent = state.profile.displayName;
+
+    document.querySelectorAll(".main-nav .nav-link").forEach((link) => {
+        link.classList.toggle("is-active", link.dataset.view === state.viewId);
+    });
+
+    document.querySelectorAll("[data-count-for]").forEach((badge) => {
+        const count = state.hasLoadedTasks ? countTasks(state.tasks, VIEWS[badge.dataset.countFor], context) : 0;
+        badge.textContent = count || "";
+    });
+    document.querySelector('[data-count-for="today"]').classList.toggle("is-alert", overdue > 0);
+
+    renderFolderList(elements.folderList, { folders: state.folders, activeViewId: state.viewId, pendingByFolder });
+    elements.foldersEmpty.hidden = state.folders.length > 0;
+}
+
+function renderConnectionStatus() {
+    const isOnline = navigator.onLine;
+    elements.connectionStatus.dataset.status = isOnline ? "online" : "offline";
+    elements.connectionLabel.textContent = isOnline ? "Sincronizado" : "Offline · alterações serão enviadas depois";
+}
+
+function setView(viewId) {
+    state.viewId = viewId;
     try {
-        changes.forEach(([key, value]) => localStorage.setItem(key, JSON.stringify(value)));
-        return true;
-    } catch (error) {
-        let rollbackFailed = false;
-        previousValues.forEach(([key, value]) => {
-            try {
-                if (value === null) localStorage.removeItem(key);
-                else localStorage.setItem(key, value);
-            } catch (rollbackError) {
-                rollbackFailed = true;
-            }
+        localStorage.setItem(LAST_VIEW_KEY, viewId);
+    } catch {
+        // Sem localStorage a visão só não é lembrada no próximo acesso.
+    }
+    render();
+    elements.taskList.focus({ preventScroll: true });
+}
+
+/* ---------- Ações ---------- */
+
+function openNewTaskDialog() {
+    const folderId = getFolderIdFromView(state.viewId);
+    const isDateView = state.viewId === "today" || state.viewId === "upcoming";
+
+    taskDialog.open({
+        folders: state.folders,
+        defaults: {
+            folderId: folderId ?? "",
+            dueDate: isDateView ? endOfTodayInputValue() : ""
+        }
+    });
+}
+
+function saveTask({ taskId, values }) {
+    if (taskId) {
+        persist(repository.updateTask(taskId, values));
+        return;
+    }
+
+    persist(repository.createTask(values));
+
+    const context = createViewContext(state.folders);
+    const currentView = resolveView(state.viewId, state.folders);
+    if (currentView.matches({ ...values, completed: false }, context)) return;
+
+    const destinationId = values.folderId ? FOLDER_VIEW_PREFIX + values.folderId : "inbox";
+    const destination = resolveView(destinationId, state.folders);
+    showToast(`Tarefa criada em ${destination.title}.`, {
+        action: { label: "Ver", onClick: () => setView(destinationId) }
+    });
+}
+
+function toggleTask(task, completed) {
+    persist(repository.setTaskCompleted(task.id, completed));
+
+    if (completed) {
+        showToast("Tarefa concluída.", {
+            type: "success",
+            action: { label: "Desfazer", onClick: () => persist(repository.setTaskCompleted(task.id, false)) }
         });
-        showMessage(rollbackFailed
-            ? "Não foi possível concluir a alteração nem restaurar todos os dados. Recarregue a página e confira suas tarefas."
-            : "Não foi possível salvar a alteração. Os dados anteriores foram mantidos.");
-        return false;
     }
 }
 
-function makeId() {
-    return globalThis.crypto && typeof globalThis.crypto.randomUUID === "function"
-        ? globalThis.crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function escapeHtml(value) {
-    return String(value).replace(/[&<>'"]/g, (character) => ({
-        "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;"
-    }[character]));
-}
-
-function parseDueDate(value) {
-    if (!value) return null;
-    const localDateTime = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(value);
-    if (localDateTime) {
-        const [, year, month, day, hour, minute, second = "0"] = localDateTime;
-        const date = new Date(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
-        if (date.getFullYear() !== Number(year) || date.getMonth() !== Number(month) - 1 || date.getDate() !== Number(day)
-            || date.getHours() !== Number(hour) || date.getMinutes() !== Number(minute)) return null;
-        return date;
-    }
-    const date = new Date(value);
-    return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function formatDueDate(value) {
-    const date = parseDueDate(value);
-    if (!date) return "";
-    return new Intl.DateTimeFormat("pt-BR", {
-        day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", hourCycle: "h23"
-    }).format(date).replace(",", " às");
-}
-
-function localDateKey(date) {
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
-}
-
-function getDueStatus(value) {
-    const date = parseDueDate(value);
-    if (!date) return "no-date";
-    if (date.getTime() < Date.now()) return "overdue";
-    if (localDateKey(date) === localDateKey(new Date())) return "today";
-    return "future";
-}
-
-function getActiveFolder() {
-    return currentView.startsWith("folder:") ? folders.find((folder) => folder.id === currentView.slice(7)) : null;
-}
-
-function getOverdueTasks() {
-    return tasks.filter((task) => !task.completed && task.dueDate && parseDueDate(task.dueDate)?.getTime() < Date.now());
-}
-
-function syncOverdueNotifications() {
-    const overdueTasks = getOverdueTasks();
-    const currentByTask = new Map(overdueTasks.map((task) => [task.id, task]));
-    const nextNotifications = overdueTasks.map((task) => {
-        const existing = notifications.find((notification) => notification.taskId === task.id && notification.dueDate === task.dueDate);
-        return existing || {
-            id: makeId(),
-            taskId: task.id,
-            dueDate: task.dueDate,
-            message: `Atenção: A tarefa '${task.name}' está vencida`,
-            createdAt: new Date().toISOString()
-        };
-    }).map((notification) => {
-        const task = currentByTask.get(notification.taskId);
-        return { ...notification, message: `Atenção: A tarefa '${task.name}' está vencida` };
-    });
-
-    const serialized = JSON.stringify(nextNotifications);
-    notifications = nextNotifications;
-    try {
-        if (localStorage.getItem(notificationsStorageKey) !== serialized) {
-            saveValue(notificationsStorageKey, notifications);
-        }
-    } catch (error) {
-        showMessage("Não foi possível ler os avisos salvos no navegador.");
-    }
-}
-
-function matchesView(task) {
-    if (currentView === "completed") return task.completed;
-    if (currentView.startsWith("folder:")) return task.folderId === currentView.slice(7);
-    if (task.completed) return false;
-    if (currentView === "inbox") return false;
-    if (currentView === "today") return !task.folderId;
-    if (currentView === "week") {
-        const date = parseDueDate(task.dueDate);
-        if (!date) return false;
-        const startOfToday = new Date();
-        startOfToday.setHours(0, 0, 0, 0);
-        const startOfNextWeek = new Date(startOfToday);
-        startOfNextWeek.setDate(startOfNextWeek.getDate() + 7);
-        return date >= startOfToday && date < startOfNextWeek;
-    }
-    return false;
-}
-
-function getViewDetails() {
-    const folder = getActiveFolder();
-    if (folder) return { title: folder.name, description: "Tarefas ativas nesta pasta" };
-    return {
-        today: { title: "Meu Dia", description: "Suas tarefas do dia a dia" },
-        inbox: { title: "Caixa de Entrada", description: "Avisos de tarefas vencidas" },
-        week: { title: "Próximos 7 Dias", description: "Tarefas com vencimento nos próximos sete dias" },
-        completed: { title: "Concluídos", description: "Tarefas que você já concluiu" }
-    }[currentView] || { title: "Meu Dia", description: "Tarefas com vencimento hoje" };
-}
-
-function renderInboxNotification(notification) {
-    const task = tasks.find((item) => item.id === notification.taskId && !item.completed && item.dueDate === notification.dueDate);
-    if (!task) return "";
-    const dueLabel = formatDueDate(task.dueDate);
-    return `<article class="task inbox-notification" data-id="${escapeHtml(task.id)}">
-        <span class="notification-icon" aria-hidden="true">!</span>
-        <div class="task-body"><h3 class="task-name">${escapeHtml(notification.message)}</h3>
-        <div class="task-meta"><span class="task-due overdue">Venceu em ${escapeHtml(dueLabel)}</span></div></div>
-        <div class="task-actions notification-actions"><button class="notice-edit" type="button" aria-label="Editar tarefa ${escapeHtml(task.name)}">✎</button><button class="notice-complete" type="button" aria-label="Concluir tarefa ${escapeHtml(task.name)}">✓</button></div>
-    </article>`;
-}
-
-function renderTask(task) {
-    const dueStatus = getDueStatus(task.dueDate);
-    const dueLabel = formatDueDate(task.dueDate);
-    const folder = folders.find((item) => item.id === task.folderId);
-    const priorityLabels = { low: "Baixa", medium: "Média", high: "Alta" };
-    const priority = priorityLabels[task.priority] ? task.priority : "medium";
-    const dueMarkup = dueLabel
-        ? `<span class="task-due ${dueStatus}">${dueStatus === "overdue" ? "Atrasada · " : dueStatus === "today" ? "Hoje · " : ""}${escapeHtml(dueLabel)}</span>`
-        : '<span class="task-due no-date">Sem prazo</span>';
-    const descriptionMarkup = task.description ? `<p class="task-description">${escapeHtml(task.description)}</p>` : "";
-    const folderMarkup = folder ? `<span class="task-folder"><span class="folder-dot" style="--folder-color:${escapeHtml(folder.color)}"></span>${escapeHtml(folder.name)}</span>` : "";
-
-    return `<article class="task ${task.completed ? "completed" : ""} ${dueStatus}" data-id="${escapeHtml(task.id)}">
-        <input class="task-check" type="checkbox" ${task.completed ? "checked" : ""} aria-label="${task.completed ? "Reabrir" : "Concluir"} ${escapeHtml(task.name)}">
-        <div class="task-body"><div class="task-heading"><h3 class="task-name">${escapeHtml(task.name)}</h3><span class="priority-badge priority-${priority}">${priorityLabels[priority]}</span></div>
-        ${descriptionMarkup}<div class="task-meta">${dueMarkup}${folderMarkup}</div></div>
-        <div class="task-actions"><button class="edit" type="button" aria-label="Editar ${escapeHtml(task.name)}">✎</button><button class="remove" type="button" aria-label="Excluir ${escapeHtml(task.name)}">×</button></div>
-    </article>`;
-}
-
-function renderTasks() {
-    syncOverdueNotifications();
-    const visibleTasks = tasks.filter(matchesView);
-    const visibleNotifications = currentView === "inbox" ? notifications.map(renderInboxNotification).filter(Boolean) : null;
-    const pending = tasks.filter((task) => !task.completed).length;
-    const viewDetails = getViewDetails();
-    document.querySelector("#pendingTasks").textContent = pending;
-    document.querySelector("#navPending").textContent = notifications.length;
-    const visibleCount = visibleNotifications ? visibleNotifications.length : visibleTasks.length;
-    document.querySelector("#totalTasks").textContent = `${visibleCount} ${visibleCount === 1 ? (visibleNotifications ? "aviso" : "tarefa") : (visibleNotifications ? "avisos" : "tarefas")}`;
-    document.querySelector("#sectionTitle").textContent = viewDetails.title;
-    document.querySelector("#sectionDescription").textContent = viewDetails.description;
-    taskList.innerHTML = visibleNotifications
-        ? visibleNotifications.length ? visibleNotifications.join("") : '<p class="empty">Nenhum aviso de tarefa vencida.</p>'
-        : visibleTasks.length ? visibleTasks.map(renderTask).join("") : '<p class="empty">Nenhuma tarefa nesta visualização.</p>';
-    document.querySelector("#openNewTask").hidden = currentView === "inbox";
-    document.querySelector("#sectionTitle").classList.toggle("inbox-title", currentView === "inbox");
-    document.querySelectorAll(".nav-link").forEach((button) => button.classList.toggle("active", button.dataset.view === currentView));
-    document.querySelectorAll(".folder-card").forEach((button) => button.classList.toggle("selected", button.dataset.view === currentView));
-}
-
-function renderProfile() {
-    const initial = (profile.displayName.trim()[0] || "U").toLocaleUpperCase("pt-BR");
-    document.querySelector("#profileName").textContent = profile.displayName;
-    document.querySelector("#avatarInitial").textContent = initial;
-    const avatarImage = document.querySelector("#avatarImage");
-    avatarImage.hidden = !profile.photo;
-    avatarImage.src = profile.photo || "";
-    document.querySelector("#avatarInitial").hidden = Boolean(profile.photo);
-}
-
-function renderFolders() {
-    const folderList = document.querySelector("#folderList");
-    const folderSelect = document.querySelector("#taskFolder");
-    const selectedId = folderSelect.value;
-    folderSelect.replaceChildren(new Option("Sem pasta", ""));
-
-    folders.forEach((folder) => {
-        const option = new Option(folder.name, folder.id);
-        folderSelect.add(option);
-    });
-    if (folders.some((folder) => folder.id === selectedId)) folderSelect.value = selectedId;
-
-    folderList.innerHTML = folders.length ? folders.map((folder) => {
-        const count = tasks.filter((task) => task.folderId === folder.id && !task.completed).length;
-        return `<div class="folder-item">
-            <button class="folder-card ${currentView === `folder:${folder.id}` ? "selected" : ""}" type="button" data-view="folder:${escapeHtml(folder.id)}">
-                <span class="folder-icon" style="--folder-color:${escapeHtml(folder.color)}" aria-hidden="true">▰</span><span class="folder-card-name">${escapeHtml(folder.name)}</span><span class="folder-count" aria-label="${count} tarefas pendentes">${count}</span>
-            </button>
-            <details class="folder-menu"><summary aria-label="Opções da pasta ${escapeHtml(folder.name)}">•••</summary><div class="folder-menu-actions"><button type="button" data-folder-action="edit" data-folder-id="${escapeHtml(folder.id)}">Renomear / cor</button><button type="button" data-folder-action="delete" data-folder-id="${escapeHtml(folder.id)}">Excluir</button></div></details>
-        </div>`;
-    }).join("") : '<p class="empty-folder">Você ainda não criou pastas.</p>';
-}
-
-function renderDate() {
-    document.querySelector("#currentDate").textContent = new Intl.DateTimeFormat("pt-BR", {
-        weekday: "long", day: "2-digit", month: "long", year: "numeric"
-    }).format(new Date()).toLocaleUpperCase("pt-BR");
-}
-
-function openTaskDialog(task = null) {
-    editingTaskId = task ? task.id : null;
-    taskForm.reset();
-    renderFolders();
-    taskFormError.hidden = true;
-    document.querySelector("#taskDialogTitle").textContent = task ? "Editar tarefa" : "Adicionar tarefa";
-    document.querySelector("#saveTaskButton").textContent = task ? "Salvar alterações" : "Adicionar tarefa";
-    if (task) {
-        taskTitle.value = task.name;
-        document.querySelector("#taskDescription").value = task.description || "";
-        taskDueDate.value = task.dueDate || "";
-        document.querySelector("#taskPriority").value = ["low", "medium", "high"].includes(task.priority) ? task.priority : "medium";
-        taskFolder.value = task.folderId || "";
-    } else {
-        const activeFolder = getActiveFolder();
-        taskFolder.value = activeFolder ? activeFolder.id : "";
-    }
-    taskDialog.showModal();
-    taskTitle.focus();
-}
-
-function openFolderDialog(folder = null) {
-    editingFolderId = folder ? folder.id : null;
-    const folderForm = document.querySelector("#folderForm");
-    folderForm.reset();
-    document.querySelector("#folderDialogTitle").textContent = folder ? "Editar pasta" : "Nova pasta";
-    document.querySelector("#saveFolderButton").textContent = folder ? "Salvar alterações" : "Criar pasta";
-    document.querySelector("#folderName").value = folder ? folder.name : "";
-    document.querySelector("#folderColor").value = folder ? folder.color : "#3b82f6";
-    showFormError(document.querySelector("#folderFormError"), "");
-    document.querySelector("#folderDialog").showModal();
-    document.querySelector("#folderName").focus();
-}
-
-function setProfilePreview(photo) {
-    const image = document.querySelector("#profilePreviewImage");
-    image.hidden = !photo;
-    image.src = photo || "";
-    document.querySelector("#profilePreviewInitial").hidden = Boolean(photo);
-}
-
-function openProfileDialog() {
-    document.querySelector("#displayName").value = profile.displayName;
-    pendingProfilePhoto = profile.photo;
-    profilePhotoChanged = false;
-    document.querySelector("#profilePhoto").value = "";
-    showFormError(document.querySelector("#profileFormError"), "");
-    document.querySelector("#profilePreviewInitial").textContent = (profile.displayName.trim()[0] || "U").toLocaleUpperCase("pt-BR");
-    setProfilePreview(pendingProfilePhoto);
-    document.querySelector("#profileDialog").showModal();
-    document.querySelector("#displayName").focus();
-}
-
-function imageFileToDataUrl(file) {
-    return new Promise((resolve, reject) => {
-        if (!file || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-            reject(new Error("Escolha uma imagem JPG, PNG ou WebP."));
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            reject(new Error("A imagem deve ter no máximo 5 MB."));
-            return;
-        }
-        const objectUrl = URL.createObjectURL(file);
-        const image = new Image();
-        image.onload = () => {
-            URL.revokeObjectURL(objectUrl);
-            const canvas = document.createElement("canvas");
-            const scale = Math.min(1, 512 / Math.max(image.naturalWidth, image.naturalHeight));
-            canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-            canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-            canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
-            resolve(canvas.toDataURL("image/jpeg", 0.82));
-        };
-        image.onerror = () => {
-            URL.revokeObjectURL(objectUrl);
-            reject(new Error("Não foi possível abrir esta imagem."));
-        };
-        image.src = objectUrl;
+function deleteTask(task) {
+    persist(repository.deleteTask(task.id));
+    showToast("Tarefa excluída.", {
+        action: { label: "Desfazer", onClick: () => persist(repository.restoreTask(task)) }
     });
 }
 
-function openDeleteFolderDialog(folderId) {
-    deletingFolderId = folderId;
-    const folder = folders.find((item) => item.id === folderId);
-    if (!folder) return;
-    document.querySelector("#deleteFolderTitle").textContent = `Excluir a pasta "${folder.name}"?`;
-    document.querySelector("#deleteFolderDialog").showModal();
+function saveFolder({ folderId, values }) {
+    persist(folderId ? repository.updateFolder(folderId, values) : repository.createFolder(values));
+}
+
+function openDeleteFolderDialog(folder) {
+    const taskCount = state.tasks.filter((task) => task.folderId === folder.id).length;
+    const keepButton = elements.deleteFolderDialog.querySelector('[data-delete-folder="keep"]');
+    const deleteButton = elements.deleteFolderDialog.querySelector('[data-delete-folder="all"]');
+
+    state.folderBeingDeleted = folder;
+    elements.deleteFolderDescription.textContent = taskCount
+        ? `A pasta "${folder.name}" tem ${plural(taskCount, "tarefa", "tarefas")}. O que você quer fazer com elas? Essa ação não pode ser desfeita.`
+        : `A pasta "${folder.name}" está vazia. Essa ação não pode ser desfeita.`;
+    keepButton.hidden = taskCount === 0;
+    deleteButton.textContent = taskCount ? "Excluir pasta e tarefas" : "Excluir pasta";
+
+    elements.deleteFolderDialog.showModal();
 }
 
 function deleteFolder(keepTasks) {
-    const folder = folders.find((item) => item.id === deletingFolderId);
+    const folder = state.folderBeingDeleted;
     if (!folder) return;
-    const nextFolders = folders.filter((item) => item.id !== folder.id);
-    const nextTasks = keepTasks
-        ? tasks.map((task) => task.folderId === folder.id ? { ...task, folderId: null } : task)
-        : tasks.filter((task) => task.folderId !== folder.id);
 
-    if (!commitCollections([["tarefas", tasks, nextTasks], ["pastas", folders, nextFolders]])) return;
-    tasks = nextTasks;
-    folders = nextFolders;
-    if (currentView === `folder:${folder.id}`) currentView = "inbox";
-    deletingFolderId = null;
-    document.querySelector("#deleteFolderDialog").close();
-    renderFolders();
-    renderTasks();
-    showMessage(keepTasks ? "Pasta excluída. As tarefas foram mantidas sem pasta." : "Pasta e tarefas associadas excluídas.", "success");
+    const taskIds = state.tasks.filter((task) => task.folderId === folder.id).map((task) => task.id);
+    persist(repository.deleteFolder(folder.id, taskIds, { keepTasks }));
+
+    state.folderBeingDeleted = null;
+    elements.deleteFolderDialog.close();
+    if (getFolderIdFromView(state.viewId) === folder.id) setView("inbox");
+
+    showToast(keepTasks ? "Pasta excluída. As tarefas foram para a Caixa de Entrada." : "Pasta e tarefas excluídas.");
 }
 
-// ================= FIRESTORE =================
-// Estrutura (a mesma do app mobile):
-//   usuarios/{uid}/tarefas/{id}  -> name, description, dueDate, priority, folderId, completed, criadoEm
-//   usuarios/{uid}/pastas/{id}   -> name, color, criadoEm
-//   usuarios/{uid}/dados/perfil  -> displayName, photo
-let unsubscribers = [];
+function saveProfile(profile) {
+    state.profile = profile;
+    persist(repository.saveProfile(profile));
 
-function userCollection(name) {
-    return collection(db, "usuarios", currentUser.uid, name);
+    if (state.user.displayName !== profile.displayName) {
+        updateProfile(state.user, { displayName: profile.displayName })
+            .catch((error) => console.error("Não foi possível atualizar o nome na conta:", error));
+    }
+    render();
 }
 
-function itemData(item) {
-    const data = {};
-    Object.keys(item).forEach((key) => {
-        if (key !== "id" && item[key] !== undefined) data[key] = item[key];
-    });
-    return data;
-}
+/* ---------- Sessão ---------- */
 
-function showSaveError(error) {
-    console.error("Erro ao salvar no Firestore:", error);
-    showMessage(error && error.code === "permission-denied"
-        ? "Sem permissão para salvar. Verifique as regras do Firestore."
-        : "Não foi possível salvar no servidor. Verifique sua conexão.");
-}
-
-// Compara a lista anterior com a nova e grava só o que mudou (em uma única operação atômica).
-// A tela já é atualizada pelo onSnapshot, inclusive offline (o Firestore guarda a fila).
-function commitCollections(changes) {
-    const batch = writeBatch(db);
-    let operations = 0;
-    changes.forEach(([name, previous, next]) => {
-        const previousById = new Map(previous.map((item) => [item.id, item]));
-        const nextIds = new Set(next.map((item) => item.id));
-        next.forEach((item) => {
-            const old = previousById.get(item.id);
-            const data = itemData(item);
-            if (old && JSON.stringify(itemData(old)) === JSON.stringify(data)) return;
-            if (!old && !data.criadoEm) data.criadoEm = Date.now();
-            batch.set(doc(db, "usuarios", currentUser.uid, name, item.id), data);
-            operations += 1;
-        });
-        previous.forEach((item) => {
-            if (nextIds.has(item.id)) return;
-            batch.delete(doc(db, "usuarios", currentUser.uid, name, item.id));
-            operations += 1;
-        });
-    });
-    if (operations === 0) return true;
-    batch.commit().catch(showSaveError);
-    return true;
-}
-
-function saveProfile(nextProfile) {
-    setDoc(doc(db, "usuarios", currentUser.uid, "dados", "perfil"), {
-        displayName: nextProfile.displayName,
-        photo: nextProfile.photo || ""
-    }).catch(showSaveError);
-    return true;
-}
-
-function sortByCreation(list) {
-    return list.sort((a, b) => (a.criadoEm || 0) - (b.criadoEm || 0));
-}
-
-function startListeners() {
-    stopListeners();
-    const onError = (error) => {
-        console.error("Erro ao ler do Firestore:", error);
-        showMessage(error && error.code === "permission-denied"
-            ? "Sem permissão para ler seus dados. Verifique as regras do Firestore."
-            : "Não foi possível carregar seus dados. Verifique sua conexão.");
-    };
-
-    unsubscribers.push(onSnapshot(userCollection("tarefas"), (snapshot) => {
-        tasks = sortByCreation(snapshot.docs.map((item) => ({
-            description: "", dueDate: "", priority: "medium", folderId: null, completed: false,
-            ...item.data(), id: item.id
-        })));
-        renderFolders();
-        renderTasks();
-    }, onError));
-
-    unsubscribers.push(onSnapshot(userCollection("pastas"), (snapshot) => {
-        folders = sortByCreation(snapshot.docs.map((item) => ({ color: "#3b82f6", ...item.data(), id: item.id })));
-        renderFolders();
-        renderTasks();
-    }, onError));
-
-    unsubscribers.push(onSnapshot(doc(db, "usuarios", currentUser.uid, "dados", "perfil"), (snapshot) => {
-        if (snapshot.exists()) {
-            const data = snapshot.data();
-            if (typeof data.displayName === "string" && data.displayName.trim()) {
-                profile = { displayName: data.displayName, photo: typeof data.photo === "string" ? data.photo : "" };
-            }
-        }
-        renderProfile();
-    }, onError));
-}
-
-function stopListeners() {
+function stopListening() {
     unsubscribers.forEach((unsubscribe) => unsubscribe());
     unsubscribers = [];
 }
 
-// Quem já usava o site guardou tarefas no navegador: sobe tudo para o Firestore uma única vez
-async function migrateLocalToFirestore() {
-    const flag = `${storageKey}:migrado`;
-    if (localStorage.getItem(flag)) return;
-    try {
-        const localTasks = readStoredValue(storageKey, [], isTaskList);
-        const localFolders = readStoredValue(foldersStorageKey, [], isFolderList);
-        const localProfile = readStoredValue(profileStorageKey, null, isProfile);
+function startSession(user) {
+    state.user = user;
+    state.profile = {
+        displayName: user.displayName || user.email?.split("@")[0] || "Você",
+        photo: ""
+    };
+    repository = createTaskRepository(user.uid);
 
-        const [remoteTasks, remoteFolders] = await Promise.all([
-            getDocs(query(userCollection("tarefas"), limit(1))),
-            getDocs(query(userCollection("pastas"), limit(1)))
-        ]);
-
-        if (remoteTasks.empty && remoteFolders.empty) {
-            const writes = [];
-            localFolders.forEach((item, index) => writes.push([doc(db, "usuarios", currentUser.uid, "pastas", item.id), { ...itemData(item), criadoEm: item.criadoEm || Date.now() + index }]));
-            localTasks.forEach((item, index) => writes.push([doc(db, "usuarios", currentUser.uid, "tarefas", item.id), { ...itemData(item), criadoEm: item.criadoEm || Date.now() + index }]));
-            if (localProfile && localProfile.displayName && localProfile.displayName !== "Usuário") {
-                writes.push([doc(db, "usuarios", currentUser.uid, "dados", "perfil"), { displayName: localProfile.displayName, photo: localProfile.photo || "" }]);
+    unsubscribers = [
+        repository.watchTasks((tasks) => {
+            state.tasks = tasks;
+            state.hasLoadedTasks = true;
+            render();
+        }, handleReadError),
+        repository.watchFolders((folders) => {
+            state.folders = folders;
+            render();
+        }, handleReadError),
+        repository.watchProfile((profile) => {
+            if (profile?.displayName?.trim()) {
+                state.profile = { displayName: profile.displayName, photo: profile.photo ?? "" };
             }
-            for (let start = 0; start < writes.length; start += 400) {
-                const batch = writeBatch(db);
-                writes.slice(start, start + 400).forEach(([reference, data]) => batch.set(reference, data));
-                await batch.commit();
-            }
-        }
-        localStorage.setItem(flag, "1");
-    } catch (error) {
-        // Não marca como migrado: tenta de novo no próximo acesso
-        console.error("Não foi possível migrar os dados locais:", error);
-    }
+            render();
+        }, handleReadError)
+    ];
+
+    ensureUserDocument(user).catch((error) => console.error("Não foi possível registrar o usuário:", error));
+    render();
 }
 
-// Dados antigos eram salvos pela chave do e-mail. Copia uma vez para a chave do uid.
-function migrateLegacyData() {
-    if (!currentUser.email || localStorage.getItem(storageKey) !== null) return;
-    const legacyKey = `taskflow:${currentUser.email}`;
-    ["", ":folders", ":profile", ":notifications"].forEach((suffix) => {
-        const value = localStorage.getItem(legacyKey + suffix);
-        if (value !== null) {
-            try { localStorage.setItem(storageKey + suffix, value); } catch (error) { /* ignora */ }
-        }
-    });
-}
-
-async function initialize() {
-    migrateLegacyData();
-    profile.displayName = currentUser.displayName || (currentUser.email ? currentUser.email.split("@")[0] : "Usuário");
-    // Avisos de vencimento continuam locais (são calculados a partir das tarefas)
-    notifications = readStoredValue(notificationsStorageKey, [], isNotificationList);
-    renderProfile();
-    renderFolders();
-    renderDate();
-    renderTasks();
-    await migrateLocalToFirestore();
-    startListeners();
-}
-
-// PROTEÇÃO DE ROTA: sem login, volta para a tela de login
 onAuthStateChanged(auth, (user) => {
     if (!user) {
-        stopListeners();
-        window.location.replace("../login/login.html");
+        stopListening();
+        window.location.replace(LOGIN_URL);
         return;
     }
-    currentUser = user;
-    storageKey = `taskflow:${user.uid}`;
-    foldersStorageKey = `${storageKey}:folders`;
-    profileStorageKey = `${storageKey}:profile`;
-    notificationsStorageKey = `${storageKey}:notifications`;
-
-    initialize().catch((error) => {
-        taskList.innerHTML = "";
-        showMessage(error.message);
-        document.querySelector("#openNewTask").disabled = true;
-        document.querySelector("#openNewFolder").disabled = true;
-        document.querySelector("#openProfile").disabled = true;
-    });
+    if (state.user?.uid !== user.uid) startSession(user);
 });
 
-document.querySelector("#logoutButton").addEventListener("click", async () => {
-    try {
-        stopListeners();
-        await signOut(auth);
-        window.location.href = "../login/login.html";
-    } catch (error) {
-        showMessage("Não foi possível sair da conta. Tente novamente.");
-    }
+/* ---------- Eventos ---------- */
+
+elements.newTaskButton.addEventListener("click", openNewTaskDialog);
+document.getElementById("new-folder").addEventListener("click", () => folderDialog.open({ folders: state.folders }));
+elements.profileButton.addEventListener("click", () => profileDialog.open(state.profile));
+
+document.getElementById("sign-out").addEventListener("click", () => {
+    stopListening();
+    signOut(auth).catch(() => showToast("Não foi possível sair. Tente novamente.", { type: "error" }));
 });
 
-document.querySelector("#openNewTask").addEventListener("click", () => openTaskDialog());
-document.querySelector("#openNewFolder").addEventListener("click", () => openFolderDialog());
-document.querySelector("#openProfile").addEventListener("click", openProfileDialog);
-
-document.querySelectorAll("[data-close]").forEach((button) => {
-    button.addEventListener("click", () => document.querySelector(`#${button.dataset.close}`).close());
-});
-
-taskForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const name = taskTitle.value.trim();
-    const dueDate = taskDueDate.value;
-    if (!name) {
-        showFormError(taskFormError, "Informe o título da tarefa.");
-        taskTitle.focus();
-        return;
-    }
-    if (dueDate && (!taskDueDate.validity.valid || !parseDueDate(dueDate))) {
-        showFormError(taskFormError, "Informe uma data e um horário válidos.");
-        taskDueDate.focus();
-        return;
-    }
-
-    const existingTask = tasks.find((task) => task.id === editingTaskId);
-    const task = {
-        ...(existingTask || {}),
-        id: existingTask ? existingTask.id : makeId(),
-        name,
-        description: document.querySelector("#taskDescription").value.trim(),
-        dueDate,
-        folderId: taskFolder.value || null,
-        priority: document.querySelector("#taskPriority").value,
-        completed: existingTask ? Boolean(existingTask.completed) : false
-    };
-    const nextTasks = existingTask
-        ? tasks.map((item) => item.id === existingTask.id ? task : item)
-        : [...tasks, task];
-    if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
-
-    tasks = nextTasks;
-    taskDialog.close();
-    renderFolders();
-    renderTasks();
-    showMessage(existingTask ? "Tarefa atualizada." : "Tarefa adicionada.", "success");
-});
-
-taskList.addEventListener("change", (event) => {
-    if (!(event.target instanceof HTMLInputElement) || !event.target.classList.contains("task-check")) return;
-    const article = event.target.closest(".task");
-    const task = tasks.find((item) => item.id === article.dataset.id);
-    if (!task) return;
-    const nextTasks = tasks.map((item) => item.id === task.id ? { ...item, completed: event.target.checked } : item);
-    if (!commitCollections([["tarefas", tasks, nextTasks]])) {
-        event.target.checked = task.completed;
-        return;
-    }
-    tasks = nextTasks;
-    renderFolders();
-    renderTasks();
-});
-
-taskList.addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) return;
-    const article = event.target.closest(".task");
-    if (!article) return;
-    const task = tasks.find((item) => item.id === article.dataset.id);
-    if (!task) return;
-    if (event.target.closest(".notice-edit")) {
-        openTaskDialog(task);
-        return;
-    }
-    if (event.target.closest(".notice-complete")) {
-        const nextTasks = tasks.map((item) => item.id === task.id ? { ...item, completed: true } : item);
-        if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
-        tasks = nextTasks;
-        renderFolders();
-        renderTasks();
-        showMessage("Tarefa concluída.", "success");
-        return;
-    }
-    if (event.target.closest(".edit")) {
-        openTaskDialog(task);
-        return;
-    }
-    if (event.target.closest(".remove") && window.confirm("Você realmente deseja excluir essa tarefa?")) {
-        const nextTasks = tasks.filter((item) => item.id !== task.id);
-        if (!commitCollections([["tarefas", tasks, nextTasks]])) return;
-        tasks = nextTasks;
-        renderFolders();
-        renderTasks();
-        showMessage("Tarefa excluída.", "success");
-    }
-});
-
-document.querySelectorAll(".nav-link").forEach((button) => {
-    button.addEventListener("click", () => {
-        currentView = button.dataset.view;
-        renderTasks();
-    });
-});
-
-document.querySelector("#folderList").addEventListener("click", (event) => {
-    if (!(event.target instanceof Element)) return;
-    const actionButton = event.target.closest("[data-folder-action]");
-    if (actionButton) {
-        actionButton.closest(".folder-menu").open = false;
-        const folder = folders.find((item) => item.id === actionButton.dataset.folderId);
+elements.sidebar.addEventListener("click", (event) => {
+    const folderAction = event.target.closest("[data-folder-action]");
+    if (folderAction) {
+        const folder = findFolder(folderAction.closest(".folder-item").dataset.folderId);
+        folderAction.closest("details").open = false;
         if (!folder) return;
-        if (actionButton.dataset.folderAction === "edit") openFolderDialog(folder);
-        else openDeleteFolderDialog(folder.id);
+
+        if (folderAction.dataset.folderAction === "edit") folderDialog.open({ folder, folders: state.folders });
+        else openDeleteFolderDialog(folder);
         return;
     }
-    const folderButton = event.target.closest(".folder-card");
-    if (folderButton) {
-        currentView = folderButton.dataset.view;
-        renderTasks();
-    }
+
+    const viewLink = event.target.closest("[data-view]");
+    if (viewLink) setView(viewLink.dataset.view);
 });
 
-document.querySelector("#folderForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const name = document.querySelector("#folderName").value.trim();
-    const errorElement = document.querySelector("#folderFormError");
-    if (!name) {
-        showFormError(errorElement, "Informe o nome da pasta.");
-        return;
-    }
-    if (folders.some((folder) => folder.name.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR") && folder.id !== editingFolderId)) {
-        showFormError(errorElement, "Já existe uma pasta com esse nome.");
-        return;
-    }
-    const current = folders.find((folder) => folder.id === editingFolderId);
-    const folder = {
-        id: current ? current.id : makeId(),
-        name,
-        color: document.querySelector("#folderColor").value
-    };
-    const nextFolders = current
-        ? folders.map((item) => item.id === current.id ? folder : item)
-        : [...folders, folder];
-    if (!commitCollections([["pastas", folders, nextFolders]])) return;
-    folders = nextFolders;
-    document.querySelector("#folderDialog").close();
-    renderFolders();
-    renderTasks();
-    showMessage(current ? "Pasta atualizada." : "Pasta criada.", "success");
+elements.taskList.addEventListener("change", (event) => {
+    if (!event.target.matches(".task-check")) return;
+    const task = findTask(event.target.closest(".task").dataset.id);
+    if (task) toggleTask(task, event.target.checked);
 });
 
-document.querySelector("#keepFolderTasks").addEventListener("click", () => deleteFolder(true));
-document.querySelector("#deleteFolderTasks").addEventListener("click", () => deleteFolder(false));
+elements.taskList.addEventListener("click", (event) => {
+    const actionButton = event.target.closest("[data-action]");
+    if (!actionButton) return;
 
-document.querySelector("#profilePhoto").addEventListener("change", async (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
-    const errorElement = document.querySelector("#profileFormError");
-    showFormError(errorElement, "");
-    try {
-        pendingProfilePhoto = await imageFileToDataUrl(file);
-        profilePhotoChanged = true;
-        setProfilePreview(pendingProfilePhoto);
-    } catch (error) {
-        showFormError(errorElement, error.message);
-        event.target.value = "";
-    }
+    const task = findTask(actionButton.closest(".task").dataset.id);
+    if (!task) return;
+
+    if (actionButton.dataset.action === "edit") taskDialog.open({ task, folders: state.folders });
+    if (actionButton.dataset.action === "delete") deleteTask(task);
 });
 
-document.querySelector("#removeProfilePhoto").addEventListener("click", () => {
-    pendingProfilePhoto = "";
-    profilePhotoChanged = true;
-    setProfilePreview("");
-    document.querySelector("#profilePhoto").value = "";
+elements.taskList.addEventListener("dblclick", (event) => {
+    const item = event.target.closest(".task");
+    if (!item || event.target.closest("button, input")) return;
+    const task = findTask(item.dataset.id);
+    if (task) taskDialog.open({ task, folders: state.folders });
 });
 
-document.querySelector("#displayName").addEventListener("input", (event) => {
-    const initial = (event.target.value.trim()[0] || "U").toLocaleUpperCase("pt-BR");
-    document.querySelector("#profilePreviewInitial").textContent = initial;
+elements.deleteFolderDialog.querySelectorAll("[data-delete-folder]").forEach((button) => {
+    button.addEventListener("click", () => deleteFolder(button.dataset.deleteFolder === "keep"));
 });
 
-document.querySelector("#profileForm").addEventListener("submit", (event) => {
-    event.preventDefault();
-    const displayName = document.querySelector("#displayName").value.trim();
-    const errorElement = document.querySelector("#profileFormError");
-    if (!displayName) {
-        showFormError(errorElement, "Informe seu nome de exibição.");
-        return;
-    }
-    if (profilePhotoChanged && pendingProfilePhoto && pendingProfilePhoto.length > 900000) {
-        showFormError(errorElement, "A foto é muito grande. Escolha uma imagem menor.");
-        return;
-    }
-    const nextProfile = {
-        displayName,
-        photo: profilePhotoChanged ? pendingProfilePhoto : profile.photo
-    };
-    if (!saveProfile(nextProfile)) return;
-    profile = nextProfile;
-    if (currentUser && currentUser.displayName !== displayName) {
-        updateProfile(currentUser, { displayName }).catch((error) => console.error("Não foi possível atualizar o nome na conta:", error));
-    }
-    document.querySelector("#profileDialog").close();
-    renderProfile();
-    showMessage("Perfil atualizado.", "success");
+document.addEventListener("click", (event) => {
+    const closeButton = event.target.closest("[data-close-dialog]");
+    if (closeButton) closeButton.closest("dialog").close();
+
+    if (event.target instanceof HTMLDialogElement) event.target.close();
+
+    document.querySelectorAll(".folder-menu[open]").forEach((menu) => {
+        if (!menu.contains(event.target)) menu.open = false;
+    });
 });
 
-renderDate();
-window.setInterval(() => {
-    if (!currentUser) return;
-    renderDate();
-    renderTasks();
-}, 60_000);
+window.addEventListener("online", renderConnectionStatus);
+window.addEventListener("offline", renderConnectionStatus);
+window.setInterval(render, REFRESH_INTERVAL);
+
+renderConnectionStatus();

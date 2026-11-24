@@ -1,96 +1,75 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-     <link rel="stylesheet" href="login.css">
-
-    <title>Recuperar senha</title>
+    <meta name="description" content="Redefina a senha da sua conta TaskFlow.">
+    <title>Recuperar senha · TaskFlow</title>
+    <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../shared/base.css">
+    <link rel="stylesheet" href="auth.css">
+    <script type="module" src="recuperar.js"></script>
 </head>
 <body>
-
-    <main class="container recuperar">
-
-        <div class="welcome">
-
-            <div class="welcome-content">
-
-                <div class="welcome-icone">
-                    <i class="fa-solid fa-key"></i>
-                </div>
-
-                <h2>
-                    Esqueceu a senha? <span>Sem problema.</span>
-                </h2>
-
-                <p>
-                    Informe o e-mail da sua conta e enviaremos as
-                    instruções para você voltar a acessar.
-                </p>
-
-                <ol class="passos">
-
+    <main class="auth-card is-reversed">
+        <section class="auth-hero">
+            <div class="auth-hero-content">
+                <div class="auth-hero-icon" aria-hidden="true"><i class="fa-solid fa-key"></i></div>
+                <h2 class="auth-hero-title">Esqueceu a senha? <span>Sem problema.</span></h2>
+                <p class="auth-hero-text">Informe o e-mail da sua conta e enviaremos um link para criar uma nova senha.</p>
+                <ol class="steps">
                     <li>
-                        <span class="passo-numero">1</span>
+                        <span class="step-number" aria-hidden="true">1</span>
                         <div>
                             <strong>Digite seu e-mail</strong>
-                            <span>Use o mesmo e-mail do seu cadastro.</span>
+                            <span>Use o mesmo e-mail do cadastro.</span>
                         </div>
                     </li>
-
                     <li>
-                        <span class="passo-numero">2</span>
+                        <span class="step-number" aria-hidden="true">2</span>
                         <div>
-                            <strong>Confira sua caixa de entrada</strong>
-                            <span>Se não encontrar, olhe também o spam.</span>
+                            <strong>Abra o link que enviamos</strong>
+                            <span>Se não encontrar, confira a caixa de spam.</span>
                         </div>
                     </li>
-
                     <li>
-                        <span class="passo-numero">3</span>
+                        <span class="step-number" aria-hidden="true">3</span>
                         <div>
                             <strong>Crie uma nova senha</strong>
-                            <span>Depois é só voltar e entrar na sua conta.</span>
+                            <span>Depois é só voltar e entrar normalmente.</span>
                         </div>
                     </li>
-
                 </ol>
-
             </div>
+            <span class="decor decor-1" aria-hidden="true"></span>
+            <span class="decor decor-2" aria-hidden="true"></span>
+            <span class="decor decor-3" aria-hidden="true"></span>
+        </section>
 
-            <div class="forma forma-1"></div>
-            <div class="forma forma-2"></div>
-            <div class="forma forma-3"></div>
+        <form class="auth-form" id="recover-form" novalidate>
+            <header class="auth-form-header">
+                <h1>Recuperar senha</h1>
+                <p class="auth-form-subtitle">Digite o e-mail cadastrado na sua conta.</p>
+            </header>
 
-        </div>
+            <p class="form-alert" id="form-alert" role="status" hidden></p>
 
-    <form id="recuperarForm" novalidate>
-            <h1>Esqueci minha senha</h1>
+            <div class="field">
+                <label class="sr-only" for="email">E-mail</label>
+                <input class="field-input" type="email" id="email" name="email" placeholder="Seu e-mail"
+                    autocomplete="email" inputmode="email" aria-describedby="email-error" required>
+                <i class="fa-solid fa-envelope field-icon" aria-hidden="true"></i>
+            </div>
+            <p class="field-error" id="email-error" aria-live="polite"></p>
 
-            <p class="texto-recuperacao">
-                Digite seu e-mail cadastrado na sua conta.
-            </p>
+            <button class="primary-button" type="submit">Enviar link</button>
 
-        <div class="input-mail">
-            <input type="email" id="emailRecuperacao" placeholder="Digite seu Email">
-            <i class="fa-solid fa-envelope"></i>
-        </div>
-
-        <span class="erro" id="erroEmailRecuperacao" role="status" aria-live="polite"></span>
-
-        <div class="button-login">
-            <button type="submit">Recuperar senha</button>
-        </div>
-
-        <div class="register">
-            <p>Ja lembrou sua senha?
-            <a href="login.html">Faça login</a></p>
-        </div>
-
-    </form>
-</main>
-
-    <script type="module" src="recuperar.js"></script>
+            <p class="auth-switch">Lembrou a senha? <a href="login.html">Voltar para o login</a></p>
+        </form>
+    </main>
 </body>
 </html>
