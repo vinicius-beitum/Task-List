@@ -1,7 +1,7 @@
 # TaskFlow
 
 Gerenciador de tarefas web com login, pastas, prazos e sincronização em tempo real via Firebase.
-
+Entre em [Releases](../../releases) para acessar o TaskList. 
 ## Funcionalidades
 
 - Cadastro, login com e-mail/senha ou Google, e recuperação de senha
