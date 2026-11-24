@@ -1,6 +1,7 @@
 import { onAuthStateChanged, signOut, updateProfile } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
 import { collection, doc, onSnapshot, writeBatch, getDocs, query, limit, setDoc } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 import { auth, db } from "../shared/firebase.js";
+import { ensureUserDocument } from "../shared/user-service.js";
 
 const taskForm = document.querySelector("#taskForm");
 const taskList = document.querySelector("#taskList");
@@ -594,6 +595,7 @@ onAuthStateChanged(auth, (user) => {
         return;
     }
     currentUser = user;
+        ensureUserDocument(user).catch((error) => console.error("Não foi possível registrar o usuário:", error));
     storageKey = `taskflow:${user.uid}`;
     foldersStorageKey = `${storageKey}:folders`;
     profileStorageKey = `${storageKey}:profile`;

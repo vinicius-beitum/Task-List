@@ -1,688 +1,129 @@
+import { auth, createUserWithEmailAndPassword, updateProfile } from "../shared/firebase.js";
+import { getAuthErrorMessage } from "../shared/auth-errors.js";
+import { checkPassword, isValidEmail, PASSWORD_RULES, PASSWORD_STRENGTH_LABELS } from "../shared/validation.js";
 import {
-    createUserWithEmailAndPassword,
-    updateProfile,
-    signOut
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
-import {
-    doc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
-
-import { auth, db } from "../shared/firebase.js";
-
-const formulario = document.getElementById("cadastroForm");
-
-const nome = document.getElementById("nome");
-const iconeNome = document.getElementById("iconeNome")
-const email = document.getElementById("emailCadastro");
-const senha = document.getElementById("senhaCadastro");
-const confirmarSenha = document.getElementById("confirmarSenha");
-const termos = document.getElementById("termos");
-const mostrarSenha = document.getElementById("mostrarSenhaCadastro");
-const mostrarConfirmarSenha = document.getElementById("mostrarConfirmarSenha");
-const requisitosSenha = document.querySelector(".requisitos-senha");
-
-const abrirTermos = document.getElementById("abrirTermos");
-const abrirPrivacidade = document.getElementById("abrirPrivacidade");
-const modalTermos = document.getElementById("modalTermos");
-const modalPrivacidade = document.getElementById("modalPrivacidade");
-const fecharTermos = document.getElementById("fecharTermos");
-const fecharPrivacidade = document.getElementById("fecharPrivacidade");
-const botaoFecharTermos = document.getElementById("botaoFecharTermos");
-const botaoFecharPrivacidade = document.getElementById("botaoFecharPrivacidade")
-
-const forcaSenha =document.getElementById("forcaSenha");
-const progressoForca = document.getElementById("progressoForca");
-const textoForca = document.getElementById("textoForca");
-
-const reqTamanho = document.getElementById("reqTamanho");
-const reqMaiuscula = document.getElementById("reqMaiuscula");
-const reqMinuscula = document.getElementById("reqMinuscula");
-const reqNumero = document.getElementById("reqNumero");
-const reqEspecial = document.getElementById("reqEspecial");
-
-const cadastroLoading = document.getElementById("cadastroLoading");
-const cadastroSucesso = document.getElementById("cadastroSucesso");
-
-// Mensagens de erro
-const erroNome = document.getElementById("erroNome");
-const erroEmail = document.getElementById("erroEmailCadastro");
-const erroSenha = document.getElementById("erroSenhaCadastro");
-const erroConfirmarSenha = document.getElementById("erroConfirmarSenha");
-const erroTermos = document.getElementById("erroTermos");
-
-// ANIMAÇÃO DE ERRO
-
-function campoComErro(campo) {
-
-    campo.classList.remove("campo-treme");
-
-    void campo.offsetWidth;
-
-    campo.classList.add("campo-treme");
-
-}
-
-formulario.addEventListener("submit", async function(event) {
-
-    event.preventDefault();
-
-    const nomeDigitado = nome.value.trim();
-    const emailDigitado = email.value.trim();
-    const senhaDigitada = senha.value;
-    const confirmarSenhaDigitada = confirmarSenha.value;
-
-    // VALIDAÇÃO DO NOME
- 
-    if (nomeDigitado === "") {
-
-        erroNome.textContent = "⚠ Digite seu nome.";
-        nome.classList.add("input-erro");
-        campoComErro(nome);
-
-        return;
-    }
-
-    // VALIDAÇÃO DO EMAIL
-
-    if (emailDigitado === "") {
-
-        erroEmail.textContent = "⚠ Digite seu e-mail.";
-        email.classList.add("input-erro");
-        campoComErro(email)
-
-        return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailRegex.test(emailDigitado)) {
-
-        erroEmail.textContent = "⚠ Digite um e-mail válido.";
-        email.classList.add("input-erro");
-        campoComErro(email)
-
-        return;
-    }
-
-    // VALIDAÇÃO DA SENHA
-   
-    if (senhaDigitada === "") {
-
-        erroSenha.textContent = "⚠ Digite uma senha.";
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-    }
-
-    if (senhaDigitada.length < 6) {
-
-        erroSenha.textContent =
-            "⚠ A senha deve ter pelo menos 6 caracteres.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha);
-
-        return;
-    }
-
-    if (!/[A-Z]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha precisa ter uma letra maiúscula.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-    }
-
-    if (!/[a-z]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha precisa ter uma letra minúscula.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-    }
-
-    if (!/[0-9]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha precisa ter um número.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-    }
-
-    if (!/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(senhaDigitada)) {
-
-        erroSenha.textContent =
-            "⚠ A senha precisa ter um caractere especial.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha)
-
-        return;
-    }
-
-    // CONFIRMAR SENHA
-
-    if (confirmarSenhaDigitada === "") {
-
-        erroConfirmarSenha.textContent =
-            "⚠ Confirme sua senha.";
-
-        confirmarSenha.classList.add("input-erro");
-        campoComErro(confirmarSenha)
-
-        return;
-    }
-
-    if (senhaDigitada !== confirmarSenhaDigitada) {
-
-        erroConfirmarSenha.textContent =
-            "⚠ As senhas não são iguais.";
-
-        confirmarSenha.classList.add("input-erro");
-        campoComErro(confirmarSenha)
-
-        return;
-    }
-
-    // TERMOS
-
-    if (!termos.checked) {
-
-        erroTermos.textContent =
-            "⚠ Você precisa aceitar os termos e condições.";
-            campoComErro(termos)
-
-        return;
-    }
-
-   // CADASTRO REALIZADO NO FIREBASE
-
-try {
-
-    cadastroLoading.classList.add("mostrar");
-
-    // Criar usuário no Firebase Authentication
-    const credencial = await createUserWithEmailAndPassword(
-        auth,
-        emailDigitado,
-        senhaDigitada
-    );
-
-    const usuario = credencial.user;
-
-    // Salvar nome no perfil de autenticação
-    await updateProfile(usuario, {
-        displayName: nomeDigitado
+    clearErrorOnInput,
+    hideFormAlert,
+    setButtonLoading,
+    setupDialogs,
+    setupPasswordToggle,
+    showFieldError,
+    showFormAlert
+} from "../shared/form-ui.js";
+
+const HOME_URL = "../home/home.html";
+
+const form = document.getElementById("signup-form");
+const {
+    name: nameInput,
+    email: emailInput,
+    password: passwordInput,
+    passwordConfirmation: confirmationInput,
+    terms: termsInput
+} = form.elements;
+const submitButton = form.querySelector("[type=submit]");
+const formAlert = document.getElementById("form-alert");
+const strengthMeter = document.getElementById("password-strength");
+const strengthLabel = document.getElementById("password-strength-label");
+const rulesList = document.getElementById("password-rules");
+
+function renderPasswordRules() {
+    const items = PASSWORD_RULES.map((rule) => {
+        const item = document.createElement("li");
+        item.dataset.rule = rule.id;
+        item.innerHTML = '<i class="fa-solid fa-circle-xmark" aria-hidden="true"></i>';
+        item.append(rule.label);
+        return item;
     });
+    rulesList.replaceChildren(...items);
+}
 
-    // Salvar dados do usuário no Firestore
-    // (se falhar, a conta já existe no Auth: não bloqueia o cadastro)
-    try {
-        await setDoc(doc(db, "usuarios", usuario.uid), {
-            nome: nomeDigitado,
-            email: emailDigitado,
-            criadoEm: serverTimestamp()
-        });
-    } catch (erroFirestore) {
-        console.error("Conta criada, mas não foi possível salvar no Firestore:", erroFirestore);
+function updatePasswordFeedback() {
+    const password = passwordInput.value;
+    const { results, score } = checkPassword(password);
+
+    strengthMeter.hidden = password.length === 0;
+    strengthMeter.dataset.score = String(score);
+    strengthLabel.textContent = PASSWORD_STRENGTH_LABELS[score];
+
+    results.forEach((rule) => {
+        const item = rulesList.querySelector(`[data-rule="${rule.id}"]`);
+        const icon = item.querySelector("i");
+        item.classList.toggle("is-valid", rule.passed);
+        icon.classList.toggle("fa-circle-check", rule.passed);
+        icon.classList.toggle("fa-circle-xmark", !rule.passed);
+    });
+}
+
+function validate({ name, email, password, confirmation }) {
+    if (!name) {
+        showFieldError(nameInput, "Digite seu nome.");
+        return false;
+    }
+    if (!email) {
+        showFieldError(emailInput, "Digite seu e-mail.");
+        return false;
+    }
+    if (!isValidEmail(email)) {
+        showFieldError(emailInput, "Digite um e-mail válido.");
+        return false;
     }
 
-    // O Firebase já deixa o usuário logado após criar a conta.
-    // Saímos para que ele entre pela tela de login, como a mensagem informa.
-    await signOut(auth);
+    const passwordCheck = checkPassword(password);
+    if (!passwordCheck.isValid) {
+        showFieldError(passwordInput, passwordCheck.error);
+        return false;
+    }
+    if (!confirmation) {
+        showFieldError(confirmationInput, "Confirme sua senha.");
+        return false;
+    }
+    if (confirmation !== password) {
+        showFieldError(confirmationInput, "As senhas não são iguais.");
+        return false;
+    }
+    if (!termsInput.checked) {
+        showFieldError(termsInput, "Aceite os termos para continuar.");
+        return false;
+    }
+    return true;
+}
 
-    cadastroLoading.classList.remove("mostrar");
+async function handleSubmit(event) {
+    event.preventDefault();
+    hideFormAlert(formAlert);
 
-    cadastroSucesso.classList.add("mostrar");
+    const values = {
+        name: nameInput.value.trim(),
+        email: emailInput.value.trim(),
+        password: passwordInput.value,
+        confirmation: confirmationInput.value
+    };
 
-    setTimeout(function() {
-        window.location.href = "login.html";
-    }, 1500);
+    if (!validate(values)) return;
 
-} catch (erro) {
+    setButtonLoading(submitButton, true, "Criando conta…");
 
-    cadastroLoading.classList.remove("mostrar");
+    try {
+        const { user } = await createUserWithEmailAndPassword(auth, values.email, values.password);
+        await updateProfile(user, { displayName: values.name });
+        window.location.replace(HOME_URL);
+    } catch (error) {
+        console.error("Falha no cadastro:", error);
+        setButtonLoading(submitButton, false);
 
-    console.error("Erro ao cadastrar:", erro);
-
-    if (erro.code === "auth/email-already-in-use") {
-
-        erroEmail.textContent = "⚠ Este e-mail já está cadastrado.";
-        email.classList.add("input-erro");
-        campoComErro(email);
-
-    } else if (erro.code === "auth/invalid-email") {
-
-        erroEmail.textContent = "⚠ E-mail inválido.";
-
-    } else if (erro.code === "auth/weak-password") {
-
-        erroSenha.textContent = "⚠ A senha não atende aos requisitos do Firebase.";
-
-    } else if (erro.code === "auth/network-request-failed") {
-
-        erroEmail.textContent = "⚠ Erro de conexão. Verifique sua internet.";
-
-    } else {
-
-        erroEmail.textContent = "⚠ Não foi possível criar sua conta. Tente novamente.";
+        if (error.code === "auth/email-already-in-use") {
+            showFieldError(emailInput, "Este e-mail já está cadastrado. Tente fazer login.");
+            return;
+        }
+        showFormAlert(formAlert, getAuthErrorMessage(error, "Não foi possível criar sua conta. Tente novamente."));
     }
 }
-});
 
-// MOSTRAR / OCULTAR SENHA
+form.addEventListener("submit", handleSubmit);
+passwordInput.addEventListener("input", updatePasswordFeedback);
 
-mostrarSenha.addEventListener("click", function() {
-
-    if (senha.type === "password") {
-
-        senha.type = "text";
-
-        mostrarSenha.classList.remove("fa-eye");
-        mostrarSenha.classList.add("fa-eye-slash");
-
-    } else {
-
-        senha.type = "password";
-
-        mostrarSenha.classList.remove("fa-eye-slash");
-        mostrarSenha.classList.add("fa-eye");
-
-    }
-
-});
-
-// MOSTRAR / OCULTAR CONFIRMAÇÃO
-
-mostrarConfirmarSenha.addEventListener("click", function() {
-
-    if (confirmarSenha.type === "password") {
-
-        confirmarSenha.type = "text";
-
-        mostrarConfirmarSenha.classList.remove("fa-eye");
-        mostrarConfirmarSenha.classList.add("fa-eye-slash");
-
-    } else {
-
-        confirmarSenha.type = "password";
-
-        mostrarConfirmarSenha.classList.remove("fa-eye-slash");
-        mostrarConfirmarSenha.classList.add("fa-eye");
-
-    }
-
-});
-
-// LIMPAR ERRO DO NOME
-
-nome.addEventListener("input", function() {
-
-    erroNome.textContent = "";
-    nome.classList.remove("input-erro");
-
-});
-
-// LIMPAR ERRO DO EMAIL
-
-
-email.addEventListener("input", function() {
-
-    erroEmail.textContent = "";
-    email.classList.remove("input-erro");
-
-});
-
-// REQUISITOS DA SENHA
-
-senha.addEventListener("input", function() {
-
-    const valor = senha.value;
-
-
-    // Mostrar requisitos somente quando digitar
-
-    if (valor.length > 0) {
-
-        requisitosSenha.classList.add("mostrar");
-
-    } else {
-
-        requisitosSenha.classList.remove("mostrar");
-
-    }
-
-    if (valor.length >= 6) {
-
-        reqTamanho.classList.add("valido");
-
-        reqTamanho.querySelector("i").classList.remove("fa-circle-xmark");
-        reqTamanho.querySelector("i").classList.add("fa-circle-check");
-
-    } else {
-
-        reqTamanho.classList.remove("valido");
-
-        reqTamanho.querySelector("i").classList.remove("fa-circle-check");
-        reqTamanho.querySelector("i").classList.add("fa-circle-xmark");
-
-    }
-
-    if (/[A-Z]/.test(valor)) {
-
-        reqMaiuscula.classList.add("valido");
-
-        reqMaiuscula.querySelector("i").classList.remove("fa-circle-xmark");
-        reqMaiuscula.querySelector("i").classList.add("fa-circle-check");
-
-    } else {
-
-        reqMaiuscula.classList.remove("valido");
-
-        reqMaiuscula.querySelector("i").classList.remove("fa-circle-check");
-        reqMaiuscula.querySelector("i").classList.add("fa-circle-xmark");
-
-    }
-
-    if (/[a-z]/.test(valor)) {
-
-        reqMinuscula.classList.add("valido");
-
-        reqMinuscula.querySelector("i").classList.remove("fa-circle-xmark");
-        reqMinuscula.querySelector("i").classList.add("fa-circle-check");
-
-    } else {
-
-        reqMinuscula.classList.remove("valido");
-
-        reqMinuscula.querySelector("i").classList.remove("fa-circle-check");
-        reqMinuscula.querySelector("i").classList.add("fa-circle-xmark");
-
-    }
-
-    if (/[0-9]/.test(valor)) {
-
-        reqNumero.classList.add("valido");
-
-        reqNumero.querySelector("i").classList.remove("fa-circle-xmark");
-        reqNumero.querySelector("i").classList.add("fa-circle-check");
-
-    } else {
-
-        reqNumero.classList.remove("valido");
-
-        reqNumero.querySelector("i").classList.remove("fa-circle-check");
-        reqNumero.querySelector("i").classList.add("fa-circle-xmark");
-
-    }
-
-    if (/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(valor)) {
-
-        reqEspecial.classList.add("valido");
-
-        reqEspecial.querySelector("i").classList.remove("fa-circle-xmark");
-        reqEspecial.querySelector("i").classList.add("fa-circle-check");
-
-    } else {
-
-        reqEspecial.classList.remove("valido");
-
-        reqEspecial.querySelector("i").classList.remove("fa-circle-check");
-        reqEspecial.querySelector("i").classList.add("fa-circle-xmark");
-
-    }
-
-
-    // Limpar mensagem de erro
-
-    erroSenha.textContent = "";
-    senha.classList.remove("input-erro");
-
-});
-
-// LIMPAR ERRO DA CONFIRMAÇÃO
-
-confirmarSenha.addEventListener("input", function() {
-
-    erroConfirmarSenha.textContent = "";
-    confirmarSenha.classList.remove("input-erro");
-
-});
-
-// LIMPAR ERRO DOS TERMOS
-
-termos.addEventListener("change", function() {
-
-    erroTermos.textContent = "";
-
-});
-
-senha.addEventListener("input", function() {
-
-    const valor = senha.value;
-
-    let pontos = 0;
-
-    if (valor.length >= 6) {
-        
-        pontos++;
-    }
-
-    if (/[A-Z]/.test(valor)) {
-        
-        pontos++;
-    }
-
-    if (/[a-z]/.test(valor)) {
-
-        pontos++;
-    }
-
-    if (/[0-9]/.test(valor)) {
-
-        pontos++;
-    }
-
-      if (/[!@#$%^&*(),.?":{}|<>_\-+=]/.test(valor)) {
-
-        pontos++;
-    }
-
-    if (valor.length > 0) {
-
-        forcaSenha.classList.add("mostrar");
-    
-    } else {
-
-        forcaSenha.classList.remove("mostrar");
-        progressoForca.style.width = "0%";
-        textoForca.textContent = "Muito Fraca";
-
-        return;
-    }
-
-    if (pontos <= 1) {
-
-        progressoForca.style.width = "20%";
-        progressoForca.style.background = "#ef4444";
-
-        textoForca.textContent = "Muito Fraca";
-        textoForca.style.color = "#ef4444";
-    }
-
-    else if (pontos === 2) {
-
-        progressoForca.style.width = "40%";
-        progressoForca.style.background ="#f97316"
-
-        textoForca.textContent = "Fraca";
-        textoForca.style.color = "#f97316";
-    } 
-
-    else if (pontos === 3 ) {
-
-        progressoForca.style.width = "60%";
-        progressoForca.style.background = "#eab308";
-
-        textoForca.textContent = "Média"
-        textoForca.style.color = "#eab308";
-    }
-    else if (pontos === 4 ) {
-
-        progressoForca.style.width = "80%"
-        progressoForca.style.background = "#3d82f6";
-
-        textoForca.textContent = "Boa"
-        textoForca.style.color = "#3d82f6";
-    }
-    else {
-        progressoForca.style.width = "100%";
-        progressoForca.style.background = "#22c55e"
-
-        textoForca.textContent = "Forte"
-        textoForca.style.color = "#22c55e"
-    }
-});
-
-
-//ABRIR TERMOS 
-
-abrirTermos.addEventListener("click", function(event) {
-
-    event.preventDefault();
-    modalTermos.classList.add("mostrar")
-});
-
-//FECHAR TERMOS 
-
-fecharTermos.addEventListener("click", function(event) {
-    event.preventDefault();
-    modalTermos.classList.remove("mostrar");
-})
-
-botaoFecharTermos.addEventListener("click", function() {
-    
-    modalTermos.classList.remove("mostrar");
-
-});
-
-
-// ABRIR PRIVACIDADE
-
-abrirPrivacidade.addEventListener("click", function(event) {
-    event.preventDefault();
-    modalPrivacidade.classList.add("mostrar");
-
-});
-
-// FECHAR PRIVACIDADE
-
-fecharPrivacidade.addEventListener("click", function() {
-    modalPrivacidade.classList.remove("mostrar");
-
-});
-
-botaoFecharPrivacidade.addEventListener("click", function() {
-    modalPrivacidade.classList.remove("mostrar");
-
-});
-
-// FECHAR CLICANDO FORA
-
-modalTermos.addEventListener("click", function(event) {
-
-    if (event.target === modalTermos) {
-        modalTermos.classList.remove("mostrar");
-    }
-
-});
-
-modalPrivacidade.addEventListener("click", function(event) {
-
-    if (event.target === modalPrivacidade) {
-        modalPrivacidade.classList.remove("mostrar");
-    }
-
-});
-
-// avançar campos 
-
-nome.addEventListener("keydown", function(event) {
-
-    if (event.key === "Enter") {
-        event.preventDefault();
-        email.focus();
-    }
-});
-
-email.addEventListener("keydown", function(event) {
-
-    if(event.key === "Enter") {
-        event.preventDefault();
-        senha.focus();
-    }
-});
-
-senha.addEventListener("keydown", function(event) {
-
-    if(event.key === "Enter") {
-        event.preventDefault();
-        confirmarSenha.focus();
-    }
-});
-
-confirmarSenha.addEventListener("keydown", function(event) {
-
-    if(event.key === "Enter") {
-        event.preventDefault();
-        if (termos.checked) {
-            formulario.requestSubmit();
-        } else {
-            termos.focus();
-        }
-    }
-});
-
-
-// Icone do Nome 
-
-nome.addEventListener("input", function() {
-
-    const nomeDigitado = nome.value.trim();
-
-    iconeNome.classList.remove("animar");
-
-    void iconeNome.offsetWidth;
-    iconeNome.classList.add("animar");
-
-    if (nomeDigitado === ""){
-
-        iconeNome.classList.remove("fa-users");
-        iconeNome.classList.add("fa-user");
-
-        return;
-    }
-
-    if (nomeDigitado.includes(" ")) {
-
-        iconeNome.classList.remove("fa-user");
-        iconeNome.classList.add("fa-users");
-    } else {
-
-        iconeNome.classList.remove("fa-users");
-        iconeNome.classList.add("fa-user");
-    }
-}) ;
+clearErrorOnInput(nameInput, emailInput, passwordInput, confirmationInput, termsInput);
+form.querySelectorAll(".field-action").forEach(setupPasswordToggle);
+setupDialogs();
+renderPasswordRules();
