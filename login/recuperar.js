@@ -1,78 +1,67 @@
-import { sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-import { auth } from "../backend/js/firebase.js";
+import { auth, sendPasswordResetEmail } from "../shared/firebase.js";
+import { getAuthErrorMessage } from "../shared/auth-errors.js";
+import { isValidEmail } from "../shared/validation.js";
+import {
+    clearErrorOnInput,
+    hideFormAlert,
+    setButtonLoading,
+    showFieldError,
+    showFormAlert
+} from "../shared/form-ui.js";
 
-const formulario = document.getElementById("recuperarForm");
-const email = document.getElementById("emailRecuperacao");
-const erro = document.getElementById("erroEmailRecuperacao");
-const botao = formulario.querySelector("button[type=submit]");
+const REMEMBERED_EMAIL_KEY = "taskflow:remembered-email";
+const ERRORS_TO_REPORT = new Set(["auth/network-request-failed", "auth/too-many-requests"]);
 
-const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const form = document.getElementById("recover-form");
+const emailInput = form.elements.email;
+const submitButton = form.querySelector("[type=submit]");
+const formAlert = document.getElementById("form-alert");
 
-function mostrarErro(texto) {
-    erro.style.color = "";
-    erro.textContent = texto;
-    email.classList.add("input-erro");
-}
-
-function mostrarSucesso(texto) {
-    erro.style.color = "#22c55e";
-    erro.textContent = texto;
-}
-
-// Preenche com o e-mail lembrado no login, se houver
-const emailSalvo = localStorage.getItem("email");
-if (emailSalvo) email.value = emailSalvo;
-
-formulario.addEventListener("submit", async function (event) {
+async function handleSubmit(event) {
     event.preventDefault();
+    hideFormAlert(formAlert);
 
-    const emailDigitado = email.value.trim();
+    const email = emailInput.value.trim();
 
-    if (emailDigitado === "") {
-        mostrarErro("⚠ Digite seu e-mail.");
+    if (!email) {
+        showFieldError(emailInput, "Digite seu e-mail.");
+        return;
+    }
+    if (!isValidEmail(email)) {
+        showFieldError(emailInput, "Digite um e-mail válido.");
         return;
     }
 
-    if (!emailRegex.test(emailDigitado)) {
-        mostrarErro("⚠ Digite um e-mail válido.");
-        return;
-    }
-
-    erro.textContent = "";
-    email.classList.remove("input-erro");
-    botao.disabled = true;
-    botao.textContent = "Enviando...";
+    setButtonLoading(submitButton, true, "Enviando…");
 
     try {
-        await sendPasswordResetEmail(auth, emailDigitado);
-    } catch (e) {
-        console.error("Erro ao enviar e-mail de recuperação:", e);
+        await sendPasswordResetEmail(auth, email);
+    } catch (error) {
+        console.error("Falha ao enviar o e-mail de recuperação:", error);
 
-        // Estes erros são reais e o usuário precisa saber
-        if (e.code === "auth/network-request-failed") {
-            mostrarErro("⚠ Erro de conexão. Verifique sua internet.");
-            botao.disabled = false;
-            botao.textContent = "Recuperar senha";
+        // Outros erros (como e-mail sem conta) caem na mensagem genérica de sucesso,
+        // para não revelar quais e-mails estão cadastrados.
+        if (ERRORS_TO_REPORT.has(error.code)) {
+            showFormAlert(formAlert, getAuthErrorMessage(error));
+            setButtonLoading(submitButton, false);
             return;
         }
-        if (e.code === "auth/too-many-requests") {
-            mostrarErro("⚠ Muitas tentativas. Tente novamente mais tarde.");
-            botao.disabled = false;
-            botao.textContent = "Recuperar senha";
-            return;
-        }
-        // Qualquer outro erro (inclusive e-mail inexistente) cai na mensagem
-        // genérica abaixo, para não revelar quais e-mails têm conta.
     }
 
-    mostrarSucesso("✔ Se esse e-mail estiver cadastrado, enviamos as instruções. Confira também o spam.");
+    showFormAlert(
+        formAlert,
+        `Se ${email} estiver cadastrado, você vai receber um link em instantes. Confira também o spam.`,
+        "success"
+    );
+    setButtonLoading(submitButton, false);
+    submitButton.textContent = "Reenviar link";
+}
 
-    setTimeout(function () {
-        window.location.href = "login.html";
-    }, 4000);
-});
+try {
+    if (!emailInput.value) emailInput.value = localStorage.getItem(REMEMBERED_EMAIL_KEY) ?? "";
+} catch {
+    // localStorage indisponível: o campo apenas começa vazio.
+}
 
-email.addEventListener("input", function () {
-    erro.textContent = "";
-    email.classList.remove("input-erro");
-});
+form.addEventListener("submit", handleSubmit);
+clearErrorOnInput(emailInput);

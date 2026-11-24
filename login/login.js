@@ -1,425 +1,160 @@
 import {
+    auth,
+    onAuthStateChanged,
     signInWithEmailAndPassword,
     signInWithPopup,
     GoogleAuthProvider,
     setPersistence,
     browserLocalPersistence,
-    browserSessionPersistence,
-    onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-auth.js";
-
+    browserSessionPersistence
+} from "../shared/firebase.js";
+import { getAuthErrorMessage, isSilentAuthError } from "../shared/auth-errors.js";
+import { isValidEmail } from "../shared/validation.js";
 import {
-    doc,
-    getDoc,
-    setDoc,
-    serverTimestamp
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
+    clearErrorOnInput,
+    hideFormAlert,
+    setButtonLoading,
+    setupCapsLockWarning,
+    setupPasswordToggle,
+    showFieldError,
+    showFormAlert
+} from "../shared/form-ui.js";
 
-import { auth, db } from "../backend/js/firebase.js";
+const HOME_URL = "../home/home.html";
+const REMEMBERED_EMAIL_KEY = "taskflow:remembered-email";
 
-const formulario = document.getElementById("loginForm");
+const form = document.getElementById("login-form");
+const { email: emailInput, password: passwordInput, remember: rememberInput } = form.elements;
+const submitButton = form.querySelector("[type=submit]");
+const googleButton = document.getElementById("google-sign-in");
+const formAlert = document.getElementById("form-alert");
+const title = document.getElementById("login-title");
+const rememberedEmailText = document.getElementById("remembered-email");
+const switchAccountButton = document.getElementById("switch-account");
 
-const email = document.getElementById("email");
-const iconeEmail = document.getElementById("iconeEmail");
-const trocarConta = document.getElementById("trocarConta");
-const limparEmail = document.getElementById("limparEmail");
-const saudacaoLogin = document.getElementById("saudacaoLogin");
-const emailSalvoLogin = document.getElementById("emailSalvoLogin");
-const senha = document.getElementById("senha");
-const lembrar = document.getElementById("lembrar");
-const verSenha = document.getElementById("verSenha");
-const capsLock = document.getElementById("capsLock");
-
-const erroEmail = document.getElementById("erroEmail");
-const erroSenha = document.getElementById("erroSenha");
-
-const loginLoading = document.getElementById("loginLoading");
-const loginSucesso = document.getElementById("loginSucesso");
-
-let loginEmAndamento = false;
-
-// Se já existe sessão ativa, vai direto para a home
-onAuthStateChanged(auth, function(usuario) {
-    if (usuario && !loginEmAndamento) {
-        window.location.replace("../home/home.html");
-    }
+const unsubscribe = onAuthStateChanged(auth, (user) => {
+    unsubscribe();
+    if (user) goHome();
 });
 
-function campoComErro(campo) {
-    
-    campo.classList.remove("campo-treme");
-    void campo.offsetWidth;
-    campo.classList.add("campo-treme");
+function goHome() {
+    window.location.replace(HOME_URL);
 }
 
-// CARREGAR E-MAIL SALVO
-
-window.addEventListener("load", function() {
-
-    const emailSalvo = localStorage.getItem("email");
-
-    if (emailSalvo) {
-
-        email.value = emailSalvo;
-
-        lembrar.checked = true;
-
-        saudacaoLogin.querySelector("h1").textContent = "Olá Novamente! 💪"
-        emailSalvoLogin.textContent = emailSalvo
-        
-        trocarConta.classList.add("mostrar");
-    } else {
-        saudacaoLogin.querySelector("h1").textContent = "Entrar na sua conta ";
-        emailSalvoLogin.textContent = "";
-        trocarConta.style.display = "none";
+function readRememberedEmail() {
+    try {
+        return localStorage.getItem(REMEMBERED_EMAIL_KEY) ?? "";
+    } catch {
+        return "";
     }
-});
+}
 
-// FORMULÁRIO DE LOGIN
+function saveRememberedEmail(email, shouldRemember) {
+    try {
+        if (shouldRemember) localStorage.setItem(REMEMBERED_EMAIL_KEY, email);
+        else localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+    } catch {
+        // Navegação privada pode bloquear o localStorage; o login continua funcionando.
+    }
+}
 
+function renderRememberedAccount(email) {
+    const hasAccount = Boolean(email);
 
-formulario.addEventListener("submit", async function(event) {
+    title.textContent = hasAccount ? "Olá de novo" : "Entrar na sua conta";
+    rememberedEmailText.textContent = email;
+    rememberedEmailText.hidden = !hasAccount;
+    switchAccountButton.hidden = !hasAccount;
+    rememberInput.checked = hasAccount;
 
+    if (hasAccount) {
+        emailInput.value = email;
+        passwordInput.focus();
+    }
+}
+
+function getPersistence() {
+    return rememberInput.checked ? browserLocalPersistence : browserSessionPersistence;
+}
+
+function validate(email, password) {
+    if (!email) {
+        showFieldError(emailInput, "Digite seu e-mail.");
+        return false;
+    }
+    if (!isValidEmail(email)) {
+        showFieldError(emailInput, "Digite um e-mail válido.");
+        return false;
+    }
+    if (!password) {
+        showFieldError(passwordInput, "Digite sua senha.");
+        return false;
+    }
+    return true;
+}
+
+async function handleSubmit(event) {
     event.preventDefault();
+    hideFormAlert(formAlert);
 
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
 
-    const emailDigitado = email.value.trim();
+    if (!validate(email, password)) return;
 
-    const senhaDigitada = senha.value;
-
-    // VERIFICAR E-MAIL
- 
-
-    if (emailDigitado === "") {
-
-        erroEmail.textContent = "⚠ Digite seu e-mail.";
-
-        email.classList.add("input-erro");
-        campoComErro(email);
-
-        return;
-
-    }
-
-    // VERIFICAR SENHA
-
-    if (senhaDigitada === "") {
-
-        erroSenha.textContent = "⚠ Digite sua senha.";
-
-        senha.classList.add("input-erro");
-        campoComErro(senha);
-
-        return;
-
-    }
-
-    // VALIDAR E-MAIL
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-    if (!emailRegex.test(emailDigitado)) {
-
-        erroEmail.textContent = "⚠ Digite um e-mail válido.";
-
-        email.classList.add("input-erro");
-        campoComErro(email);
-
-        return;
-
-    }
-
-    // Obs.: as regras de complexidade da senha valem só no cadastro.
-    // No login quem decide se a senha está certa é o Firebase.
-
-    // LEMBRAR E-MAIL
-
-    if (lembrar.checked) {
-        localStorage.setItem("email", emailDigitado);
-    } else {
-        localStorage.removeItem("email");
-    }
-
-    // MOSTRAR LOADING
-
-    loginLoading.classList.add("mostrar");
-    loginEmAndamento = true;
+    setButtonLoading(submitButton, true, "Entrando…");
 
     try {
-
-        // "Lembrar" marcado = sessão fica salva; desmarcado = acaba ao fechar a aba
-        await setPersistence(
-            auth,
-            lembrar.checked ? browserLocalPersistence : browserSessionPersistence
-        );
-
-        // AUTENTICAR USUÁRIO NO FIREBASE
-
-        await signInWithEmailAndPassword(
-            auth,
-            emailDigitado,
-            senhaDigitada
-        );
-
-        // LOGIN REALIZADO
-
-        loginLoading.classList.remove("mostrar");
-        loginSucesso.classList.add("mostrar");
-
-        setTimeout(function() {
-            window.location.href = "../home/home.html";
-        }, 1000);
-
-    } catch (erro) {
-
-        loginEmAndamento = false;
-        loginLoading.classList.remove("mostrar");
-
-        console.error("Erro no login:", erro);
-
-        if (erro.code === "auth/invalid-email") {
-
-            erroEmail.textContent = "⚠ Digite um e-mail válido.";
-            campoComErro(email);
-
-        } else if (
-            erro.code === "auth/invalid-credential" ||
-            erro.code === "auth/wrong-password" ||
-            erro.code === "auth/user-not-found"
-        ) {
-
-            erroEmail.textContent = "E-mail ou senha incorretos.";
-            campoComErro(email);
-            campoComErro(senha);
-
-        } else if (erro.code === "auth/too-many-requests") {
-
-            erroSenha.textContent =
-                "Muitas tentativas. Tente novamente mais tarde.";
-
-            campoComErro(senha);
-
-        } else if (erro.code === "auth/network-request-failed") {
-
-            erroEmail.textContent =
-                "Erro de conexão. Verifique sua internet.";
-
-        } else {
-
-            erroEmail.textContent =
-                "Não foi possível entrar. Tente novamente.";
-        }
+        await setPersistence(auth, getPersistence());
+        await signInWithEmailAndPassword(auth, email, password);
+        saveRememberedEmail(email, rememberInput.checked);
+        goHome();
+    } catch (error) {
+        console.error("Falha no login:", error);
+        showFormAlert(formAlert, getAuthErrorMessage(error, "Não foi possível entrar. Tente novamente."));
+        setButtonLoading(submitButton, false);
     }
-
-});
-
-
-verSenha.addEventListener("click", function() {
-
-    if (senha.type === "password") {
-
-        senha.type = "text";
-
-        verSenha.classList.remove("fa-eye");
-
-        verSenha.classList.add("fa-eye-slash");
-
-    } else {
-
-        senha.type = "password";
-
-        verSenha.classList.remove("fa-eye-slash");
-
-        verSenha.classList.add("fa-eye");
-
-    }
-
-});
-
-// LIMPAR ERRO DO E-MAIL
-
-email.addEventListener("input", function() {
-
-    const valor = email.value.trim();
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    erroEmail.textContent = "";
-
-    email.classList.remove("input-erro");
-
-    iconeEmail.classList.remove("email-valido");
-    iconeEmail.classList.remove("email-invalido");
-
-    if(valor === "") {
-        return;
-    }
-
-    if(emailRegex.test(valor)) {
-
-        iconeEmail.classList.add("email-valido");
-    } else {
-        iconeEmail.classList.add("email-invalido")
-    }
-});
-
-// LIMPAR ERRO DA SENHA
-
-senha.addEventListener("input", function() {
-
-    erroSenha.textContent = "";
-
-    senha.classList.remove("input-erro");
-
-});
-
-
-email.addEventListener("keydown" , function(event) {
-
-    if(event.key === "Enter") {
-        event.preventDefault();
-        senha.focus()
-    }
-});
-
-senha.addEventListener("keydown", function(event) {
-
-    if (event.key === "Enter") {
-        event.preventDefault();
-        formulario.requestSubmit()
-    }
-});
-
-senha.addEventListener("keyup", function(event) {
-
-    if (event.getModifierState("CapsLock")) {
-
-        capsLock.classList.add("mostrar");
-
-    } else {
-
-        capsLock.classList.remove("mostrar");
-
-    }
-
-});
-
-// MOSTRAR / ESCONDER BOTÃO DE LIMPAR E-MAIL X
-
-email.addEventListener("input", function() {
-
-    if (email.value.length > 0) {
-
-        limparEmail.classList.add("mostrar");
-
-    } else {
-
-        limparEmail.classList.remove("mostrar");
-        trocarConta.classList.remove("mostrar");
-    }
-
-});
-
-// LIMPAR E-MAIL
-
-limparEmail.addEventListener("click", function() {
-
-    email.value = "";
-
-    limparEmail.classList.remove("mostrar");
-
-    erroEmail.textContent = "";
-
-    email.classList.remove("input-erro");
-
-    email.focus();
-
-});
-
-trocarConta.addEventListener("click", function() {
-
-    localStorage.removeItem("email");
-
-    email.value = "";
-
-    lembrar.checked = false;
-
-    saudacaoLogin.querySelector("h1").textContent = 
-    "Entrar na sua Conta";
-
-    emailSalvoLogin.textContent = "";
-
-    trocarConta.style.display = "none";
-
-    email.focus();
-});
-
-
-// LOGIN COM GOOGLE
-
-const botaoGoogle = document.querySelector(".botao-social.google");
-const botaoApple = document.querySelector(".botao-social.apple");
-
-botaoGoogle.addEventListener("click", async function() {
-
-    loginEmAndamento = true;
-    erroEmail.textContent = "";
+}
+
+async function handleGoogleSignIn() {
+    hideFormAlert(formAlert);
+    googleButton.disabled = true;
 
     try {
+        await setPersistence(auth, getPersistence());
+        await signInWithPopup(auth, new GoogleAuthProvider());
+        goHome();
+    } catch (error) {
+        googleButton.disabled = false;
+        if (isSilentAuthError(error)) return;
 
-        await setPersistence(
-            auth,
-            lembrar.checked ? browserLocalPersistence : browserSessionPersistence
-        );
-
-        const resultado = await signInWithPopup(auth, new GoogleAuthProvider());
-        const usuario = resultado.user;
-
-        // Primeiro acesso com Google: cria o documento do usuário (mesma estrutura do cadastro)
-        try {
-            const ref = doc(db, "usuarios", usuario.uid);
-            const existente = await getDoc(ref);
-
-            if (!existente.exists()) {
-                await setDoc(ref, {
-                    nome: usuario.displayName || "",
-                    email: usuario.email || "",
-                    criadoEm: serverTimestamp()
-                });
-            }
-        } catch (erroFirestore) {
-            console.error("Login ok, mas não foi possível salvar o usuário no Firestore:", erroFirestore);
+        if (error.code === "auth/unauthorized-domain") {
+            console.error("Adicione este domínio em Firebase > Authentication > Settings > Authorized domains.");
         }
+        console.error("Falha no login com Google:", error);
+        showFormAlert(formAlert, getAuthErrorMessage(error, "Não foi possível entrar com o Google."));
+    }
+}
 
-        loginSucesso.classList.add("mostrar");
+form.addEventListener("submit", handleSubmit);
+googleButton.addEventListener("click", handleGoogleSignIn);
 
-        setTimeout(function() {
-            window.location.href = "../home/home.html";
-        }, 1000);
-
-    } catch (erro) {
-
-        loginEmAndamento = false;
-        console.error("Erro no login com Google:", erro);
-
-        // Fechar o popup não é erro de verdade
-        if (erro.code === "auth/popup-closed-by-user" || erro.code === "auth/cancelled-popup-request") {
-            return;
-        }
-
-        if (erro.code === "auth/popup-blocked") {
-            erroEmail.textContent = "⚠ O navegador bloqueou a janela do Google. Libere pop-ups e tente de novo.";
-        } else if (erro.code === "auth/unauthorized-domain") {
-            erroEmail.textContent = "⚠ Este domínio não está autorizado no Firebase (Authentication > Settings > Authorized domains).";
-        } else if (erro.code === "auth/network-request-failed") {
-            erroEmail.textContent = "⚠ Erro de conexão. Verifique sua internet.";
-        } else {
-            erroEmail.textContent = "⚠ Não foi possível entrar com o Google. Tente novamente.";
-        }
+emailInput.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !passwordInput.value) {
+        event.preventDefault();
+        passwordInput.focus();
     }
 });
 
-// Apple exige conta de desenvolvedor Apple paga: fica para uma próxima etapa
-botaoApple.addEventListener("click", function() {
-    erroEmail.textContent = "Login com Apple em breve.";
+switchAccountButton.addEventListener("click", () => {
+    saveRememberedEmail("", false);
+    renderRememberedAccount("");
+    emailInput.value = "";
+    emailInput.focus();
 });
+
+clearErrorOnInput(emailInput, passwordInput);
+setupPasswordToggle(form.querySelector("[aria-controls=password]"));
+setupCapsLockWarning(passwordInput, document.getElementById("caps-lock-warning"));
+const rememberedEmail = readRememberedEmail();
+if (rememberedEmail && !emailInput.value) renderRememberedAccount(rememberedEmail);
