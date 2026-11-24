@@ -99,3 +99,18 @@ export function getVisibleTasks(tasks, view, context) {
 export function countTasks(tasks, view, context) {
     return tasks.reduce((total, task) => total + (view.matches(task, context) ? 1 : 0), 0);
 }
+
+
+export function getTaskStats(tasks, now = new Date()) {
+    const total = tasks.length;
+    const completed = tasks.filter((task) => task.completed).length;
+    const overdue = tasks.filter((task) => !task.completed && getDueStatus(task.dueDate, now) === "overdue").length;
+
+    return {
+        total,
+        completed,
+        pending: total - completed,
+        overdue,
+        completionRate: total ? Math.round((completed / total) * 100) : 0
+    };
+}

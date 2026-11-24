@@ -78,6 +78,58 @@
                 <p class="page-summary" id="summary"></p>
             </header>
 
+            <section class="dashboard" aria-labelledby="dashboard-title">
+                <header class="dashboard-header">
+                    <h2 class="dashboard-title" id="dashboard-title">Visão geral</h2>
+                    <p class="dashboard-subtitle">Acompanhe seu desempenho</p>
+                </header>
+
+                <div class="stats-grid">
+                    <article class="stat-card">
+                        <span class="stat-icon" data-tone="blue" aria-hidden="true"><i class="fa-solid fa-list-check"></i></span>
+                        <div>
+                            <strong class="stat-value" id="stat-total">–</strong>
+                            <span class="stat-label">Total de tarefas</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon" data-tone="green" aria-hidden="true"><i class="fa-solid fa-check"></i></span>
+                        <div>
+                            <strong class="stat-value" id="stat-completed">–</strong>
+                            <span class="stat-label">Concluídas</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon" data-tone="yellow" aria-hidden="true"><i class="fa-regular fa-clock"></i></span>
+                        <div>
+                            <strong class="stat-value" id="stat-pending">–</strong>
+                            <span class="stat-label">Pendentes</span>
+                        </div>
+                    </article>
+                    <article class="stat-card">
+                        <span class="stat-icon" data-tone="red" aria-hidden="true"><i class="fa-solid fa-exclamation"></i></span>
+                        <div>
+                            <strong class="stat-value" id="stat-overdue">–</strong>
+                            <span class="stat-label">Atrasadas</span>
+                        </div>
+                    </article>
+                </div>
+
+                <div class="progress-card">
+                    <div class="progress-info">
+                        <div>
+                            <h3 class="progress-title" id="progress-title">Progresso geral</h3>
+                            <p class="progress-description" id="progress-description">Carregando…</p>
+                        </div>
+                        <strong class="progress-percentage" id="progress-percentage">0%</strong>
+                    </div>
+                    <div class="progress-track" id="progress-bar" role="progressbar"
+                        aria-labelledby="progress-title" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+            </section>
+            
             <section class="task-panel" aria-labelledby="view-title">
                 <header class="task-panel-header">
                     <div>

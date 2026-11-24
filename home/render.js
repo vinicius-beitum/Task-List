@@ -89,3 +89,23 @@ export function renderAvatar(avatar, { name, photo }) {
     if (photo) image.src = photo;
     else image.removeAttribute("src");
 }
+
+
+function describeProgress({ total, completed }) {
+    if (total === 0) return "Crie sua primeira tarefa para acompanhar o progresso.";
+    if (completed === 0) return "Nenhuma tarefa concluída ainda.";
+    if (completed === total) return "Todas as tarefas concluídas.";
+    return `${completed} de ${total} tarefas concluídas.`;
+}
+
+export function renderDashboard(dashboard, stats) {
+    dashboard.total.textContent = stats.total;
+    dashboard.completed.textContent = stats.completed;
+    dashboard.pending.textContent = stats.pending;
+    dashboard.overdue.textContent = stats.overdue;
+
+    dashboard.progressDescription.textContent = describeProgress(stats);
+    dashboard.progressPercentage.textContent = `${stats.completionRate}%`;
+    dashboard.progressFill.style.width = `${stats.completionRate}%`;
+    dashboard.progressBar.setAttribute("aria-valuenow", String(stats.completionRate));
+}
