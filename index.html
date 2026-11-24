@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TaskFlow</title>
+    <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+    <script type="module">
+        import { auth, onAuthStateChanged } from "./shared/firebase.js";
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            unsubscribe();
+            window.location.replace(user ? "home/home.html" : "login/login.html");
+        });
+    </script>
+</head>
+<body>
+    <noscript>O TaskFlow precisa de JavaScript ativado para funcionar.</noscript>
+</body>
+</html>

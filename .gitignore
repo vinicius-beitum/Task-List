@@ -1,0 +1,14 @@
+# Editores e sistema operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+
+# Firebase CLI
+.firebase/
+firebase-debug.log
+firestore-debug.log
+
+# Dependências (caso o projeto passe a usar npm)
+node_modules/
