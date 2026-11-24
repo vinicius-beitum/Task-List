@@ -1,17 +1,17 @@
 import { auth, onAuthStateChanged, signOut, updateProfile } from "../shared/firebase.js";
 import { ensureUserDocument } from "../shared/user-service.js";
-import { formatLongDate, getDueStatus } from "./date-utils.js";
+import { formatLongDate } from "./date-utils.js";
 import { createTaskRepository } from "./task-repository.js";
 import {
     VIEWS,
     FOLDER_VIEW_PREFIX,
     countTasks,
     createViewContext,
-    getFolderIdFromView,
+    getFolderIdFromView,  getTaskStats,
     getVisibleTasks,
     resolveView
 } from "./task-views.js";
-import { renderAvatar, renderFolderList, renderTaskList } from "./render.js";
+import { renderAvatar, renderDashboard, renderFolderList, renderTaskList } from "./render.js";
 import { createTaskDialog, endOfTodayInputValue } from "./task-dialog.js";
 import { createFolderDialog } from "./folder-dialog.js";
 import { createProfileDialog } from "./profile-dialog.js";
@@ -40,7 +40,17 @@ const elements = {
     taskList: document.getElementById("task-list"),
     emptyState: document.getElementById("empty-state"),
     deleteFolderDialog: document.getElementById("delete-folder-dialog"),
-    deleteFolderDescription: document.getElementById("delete-folder-description")
+    deleteFolderDescription: document.getElementById("delete-folder-description"),
+     dashboard: {
+        total: document.getElementById("stat-total"),
+        completed: document.getElementById("stat-completed"),
+        pending: document.getElementById("stat-pending"),
+        overdue: document.getElementById("stat-overdue"),
+        progressDescription: document.getElementById("progress-description"),
+        progressPercentage: document.getElementById("progress-percentage"),
+        progressBar: document.getElementById("progress-bar"),
+        progressFill: document.getElementById("progress-fill")
+    }
 };
 
 const state = {
@@ -116,17 +126,13 @@ function buildSummary(dueToday, overdue, pending) {
     return "Tudo em dia. Nenhuma tarefa pendente.";
 }
 
-function renderHeader(now, context) {
+function renderHeader(now, context, stats) {
     const firstName = state.profile.displayName.trim().split(/\s+/)[0];
-    const pending = state.tasks.filter((task) => !task.completed);
-    const overdue = pending.filter((task) => getDueStatus(task.dueDate, now) === "overdue").length;
-    const dueToday = countTasks(state.tasks, VIEWS.today, context) - overdue;
+    const dueToday = countTasks(state.tasks, VIEWS.today, context) - stats.overdue;
 
     elements.currentDate.textContent = formatLongDate(now);
     elements.greeting.textContent = firstName ? `${getGreeting(now)}, ${firstName}` : getGreeting(now);
-    elements.summary.textContent = state.hasLoadedTasks ? buildSummary(dueToday, overdue, pending.length) : "";
-
-    return overdue;
+    elements.summary.textContent = state.hasLoadedTasks ? buildSummary(dueToday, stats.overdue, stats.pending) : "";
 }
 
 function render() {
@@ -139,8 +145,10 @@ function render() {
         view = VIEWS.today;
     }
 
-    const overdue = renderHeader(now, context);
-    renderSidebar(context, overdue);
+        const stats = getTaskStats(state.tasks, now);
+
+    renderHeader(now, context, stats);
+    renderSidebar(context, stats.overdue);
 
     elements.viewTitle.textContent = view.title;
     elements.viewDescription.textContent = view.description;
@@ -149,6 +157,7 @@ function render() {
 
     if (!state.hasLoadedTasks) return;
 
+    renderDashboard(elements.dashboard, stats);
     const visibleTasks = getVisibleTasks(state.tasks, view, context);
     elements.taskCount.textContent = `· ${plural(visibleTasks.length, "tarefa", "tarefas")}`;
 

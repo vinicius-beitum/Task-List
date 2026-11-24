@@ -355,6 +355,141 @@ body {
     font-size: 14px;
 }
 
+/* Dashboard */
+
+.dashboard {
+    margin-bottom: 24px;
+}
+
+.dashboard-header {
+    margin-bottom: 14px;
+}
+
+.dashboard-title {
+    font-size: 17px;
+}
+
+.dashboard-subtitle {
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-width: 0;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--panel);
+}
+
+.stat-icon {
+    display: grid;
+    place-items: center;
+    flex: 0 0 38px;
+    height: 38px;
+    border-radius: 9px;
+    font-size: 16px;
+}
+
+.stat-icon[data-tone="blue"] { background: rgba(59, 130, 246, 0.14); color: #60a5fa; }
+.stat-icon[data-tone="green"] { background: rgba(74, 222, 128, 0.13); color: #4ade80; }
+.stat-icon[data-tone="yellow"] { background: rgba(251, 191, 36, 0.13); color: #fbbf24; }
+.stat-icon[data-tone="red"] { background: rgba(248, 113, 113, 0.13); color: #f87171; }
+
+.stat-value {
+    display: block;
+    font-size: 24px;
+    font-weight: 700;
+    line-height: 1.15;
+    font-variant-numeric: tabular-nums;
+}
+
+.stat-label {
+    display: block;
+    margin-top: 2px;
+    color: var(--color-text-muted);
+    font-size: 12px;
+}
+
+.progress-card {
+    margin-top: 12px;
+    padding: 18px 20px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-md);
+    background: var(--panel);
+}
+
+.progress-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.progress-title {
+    font-size: 14px;
+}
+
+.progress-description {
+    margin-top: 4px;
+    color: var(--color-text-muted);
+    font-size: 13px;
+}
+
+.progress-percentage {
+    color: #93c5fd;
+    font-size: 21px;
+    font-variant-numeric: tabular-nums;
+}
+
+.progress-track {
+    height: 8px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #303541;
+}
+
+.progress-fill {
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--color-primary);
+    transition: width 0.3s ease;
+}
+
+@media (max-width: 860px) {
+    .stats-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .stat-card {
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .stat-icon {
+        flex-basis: 32px;
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .stat-value {
+        font-size: 21px;
+    }
+}
 /* Painel de tarefas */
 
 .task-panel {
